@@ -4,85 +4,51 @@ USE IEEE.NUMERIC_STD.ALL;
 USE work.packages.ALL;
 
 ENTITY Mover_A IS
-	PORT (
-		clk : IN STD_LOGIC;
-		rst : IN STD_LOGIC;
-		btnU, btnD, btnL, btnR : IN STD_LOGIC;
-		R1 : OUT unsigned(9 DOWNTO 0);
-		C1 : OUT unsigned(9 DOWNTO 0)
-	);
+    PORT (
+        clk : IN STD_LOGIC;
+        rst : IN STD_LOGIC;
+        btnU, btnD, btnL, btnR : IN STD_LOGIC;
+        R1 : OUT unsigned(9 DOWNTO 0);
+        C1 : OUT unsigned(9 DOWNTO 0)
+    );
 END Mover_A;
 
 ARCHITECTURE archi OF Mover_A IS
-	--signal dx, dy : std_logic;
-	SIGNAL x, y : unsigned(9 DOWNTO 0);
-	-- W =LARGURA Do sprite
-	-- H = ALTURA Do sprite
-	CONSTANT w : unsigned(9 DOWNTO 0) := to_unsigned(240, 10);--10 é tamanho padrão para esta resolução paraconseguir calcular com as outras medias
-	CONSTANT h : unsigned(9 DOWNTO 0) := to_unsigned(160, 10);
-	SIGNAL rom_addr_s : std_logic_vector(19 DOWNTO 0);
-	SIGNAL flag : std_logic;
+    SIGNAL x, y : unsigned(9 DOWNTO 0) := (others => '0');
+    CONSTANT max_width : unsigned(9 DOWNTO 0) := TO_UNSIGNED(400, 10); -- Supondo uma largura de tela de 480 pixels
+    CONSTANT max_height : unsigned(9 DOWNTO 0) := TO_UNSIGNED(320, 10); -- Supondo uma altura de tela de 320 pixels
 BEGIN
-	R1 <= y;
-	C1 <= x;
-	-- combinatoire pour reduir le clock
-	control : PROCESS (clk, rst)
-	BEGIN
-		-- para usar o rst e o clk tem q colocar if rst elsif clock
-		-- se não ele só executa dentro do rst.
+    R1 <= y;
+    C1 <= x;
 
-		IF rst = '1' THEN
-			--Defines the image in the center
-			x <= TO_UNSIGNED(320, 10);
-			y <= TO_UNSIGNED(240, 10);
-			-- verifica a borda de subida do clock para fazer as mudanças
-		ELSIF clk'EVENT AND clk = '1' THEN
- 
-			IF flag = '0' THEN
-				IF btnU = '1' AND btnL = '1' THEN           -- diagonal direita pra baixo
-					x <= x + 1;
-					y <= y + 1;
-				ELSIF btnU = '1' AND btnR = '1' THEN         -- diagonal esquerda pra baixo
-					x <= x - 1;
-					y <= y + 1;
-			    ELSIF btnR = '1' THEN                        -- direita
-			        x <= x + 1;
-			    ELSIF btnL = '1' THEN                        -- esquerda
-			        x <= x - 1;
-				ELSIF btnU = '1' THEN                        -- vai pra cima
-					y <= y - 1;
-				END IF;
- 
-				IF btnD = '1' AND btnL = '1' THEN            -- diagonal direita pra cima
-					y <= y - 1;
-					x <= x + 1;
-				ELSIF btnD = '1' AND btnR = '1' THEN         -- diagonal esquerda pra cima
-					y <= y - 1;
-					x <= x - 1;
-				ELSIF btnD = '1' THEN                        -- vai pra baixo
-					y <= y + 1;    
-				END IF;
-			END IF;
-		END IF;
-	END PROCESS;
-	
-	process(clk, rst)
-	begin
-	   if rst = '1' then
-	       flag <= '0';
-	   elsif rising_edge(clk) then
-	       IF (x + w)/2 > 320 THEN
-				flag <= '0';
-			ELSIF (y + h)/2 > 240 THEN
-				flag <= '0';
-			END IF;
-			
-			IF x + w > 6
-			 THEN
-				flag <= '1';
-			ELSIF y + h > 480 THEN
-				flag <= '1';
-			END IF;
-	   end if;
-	end process;
+    -- Processo para controlar a movimentação
+    control : PROCESS (clk)
+    BEGIN
+        IF rising_edge(clk) THEN
+            IF rst = '1' THEN
+                x <= TO_UNSIGNED(320, 10);
+                y <= TO_UNSIGNED(240, 10);
+            ELSE
+                -- Movimentação para a direita
+                IF btnR = '1' AND x < max_width THEN
+                    x <= x + 1;
+                END IF;
+
+                -- Movimentação para a esquerda
+                IF btnL = '1' AND x > 0 THEN
+                    x <= x - 1;
+                END IF;
+
+                -- Movimentação para cima
+                IF btnU = '1' AND y > 0 THEN
+                    y <= y - 1;
+                END IF;
+
+                -- Movimentação para baixo
+                IF btnD = '1' AND y < max_height THEN
+                    y <= y + 1;
+                END IF;
+            END IF;
+        END IF;
+    END PROCESS control;
 END archi;

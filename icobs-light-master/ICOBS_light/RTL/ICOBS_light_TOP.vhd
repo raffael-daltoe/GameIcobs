@@ -182,6 +182,7 @@ begin
 		seg  			=> seg,
 		an				=> an,
 		dp				=> dp);
+------------------------------
 
     GPIOA: io_driver
 	generic map (IOPA_LEN)

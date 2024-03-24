@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL; 
 use work.packages.all;
 
-ENTITY VGA_Basic_ROM_Top IS
+ENTITY VGA_TOP IS
        PORT (
               clk : IN STD_LOGIC;
               btnR : IN STD_LOGIC;
@@ -15,9 +15,9 @@ ENTITY VGA_Basic_ROM_Top IS
               vgaGreen : OUT vector4;
               vgaBlue : OUT vector4
        );
-END VGA_Basic_ROM_Top;
+END VGA_TOP;
 
-ARCHITECTURE Behavioral OF VGA_Basic_ROM_Top IS
+ARCHITECTURE Behavioral OF VGA_TOP IS
 
        SIGNAL rst, clk100,clk25, vidon : STD_LOGIC;
        SIGNAL hc, vc : vector10;
@@ -29,7 +29,7 @@ BEGIN
     U2 : ENTITY work.VGA_640_x_480 PORT MAP (rst => rst, clk => clk25, hsync => Hsync, vsync => Vsync, hc => hc, vc => vc, vidon => vidon);
     U3 : ENTITY work.VGA_Basic_ROM PORT MAP (vidon => vidon, hc => hc, vc => vc, R1=>R1, C1 =>C1, M => M, rom_addr4 => addr, red => vgaRed, green => vgaGreen, blue => vgaBlue);
     U4 : ENTITY work.prom_sprite port map(clka => clk25,addra => addr, douta => M );
-    U5 : ENTITY work.VGA_Clock100hz port map(mclk => clk,reset => rst, clk100 => clk100 );
+    U5 : ENTITY work.VGA_Clock100hz generic map (N => 19)  port map(clk_in => clk,rst => rst, clk_out => clk100 );
     U6 : ENTITY work.Mover_A port map(clk => clk100, rst => rst, R1 => R1, C1 => C1,btnD => btnD, btnU => btnU, btnL => btnL, btnR => btnR);
     --U4 : ENTITY work.Basic_ROM PORT MAP (addr => addr, M => M);
        rst <= btnC;

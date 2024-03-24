@@ -55,22 +55,36 @@ architecture arch of ahblite_vga is
 
     signal Background : std_logic_vector(31 downto 0);
 	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
-
+    --signal X1_Position, Y1_Position : std_logic;
 
 ----------------------------------------------------------------
 begin
 
-    DTop_1: entity work.VGA_Display_Top port map(
-            clk                => HCLK,
-            btnR               => RST,
-            Hsync              => Hsync_ahblite,
-            Vsync              => Vsync_ahblite,
-            --sw                 => Background (11 DOWNTO 0),
-			sw				   => sw,
-            vgaRed		   	   => vgaRed_ahblite,
-            vgaGreen   		   => vgaGreen_ahblite,
-            vgaBlue   		   => vgaBLue_ahblite
-       );
+    -- DTop_1: entity work.VGA_Display_Top port map(
+    --         clk                => HCLK,
+    --         btnR               => RST,
+    --         Hsync              => Hsync_ahblite,
+    --         Vsync              => Vsync_ahblite,
+    --         --sw                 => Background (11 DOWNTO 0),
+	-- 		sw				   => sw,
+    --         vgaRed		   	   => vgaRed_ahblite,
+    --         vgaGreen   		   => vgaGreen_ahblite,
+    --         vgaBlue   		   => vgaBLue_ahblite
+    --    );
+	VGA_ROM_TOP : entity work.VGA_TOP port map(
+		clk 		=>  HCLK,
+        btnC 		=>  RST,
+        Hsync 		=>  Hsync_ahblite,
+        Vsync 		=>  Vsync_ahblite,
+		btnU		=> 	Y1_Position(0),	-- above
+		btnD		=> 	Y1_Position(1),	-- below
+		btnR		=> 	X1_Position(0),	-- right
+		btnL		=> 	X1_Position(1),	-- left
+        vgaRed   	=>  vgaRed_ahblite,
+        vgaGreen 	=>  vgaGreen_ahblite,
+        vgaBlue  	=>  vgaBLue_ahblite
+
+	);
 
 	RST <= not HRESETn;
 
@@ -98,7 +112,8 @@ begin
             Background <= (others => '0');
 			Y1_Position <= (others => '0');
 			X1_Position <= (others => '0');
-			
+			--Y1_Position <= '0';
+			--X1_Position <= '0';
 		--------------------------------
 		elsif rising_edge(HCLK) then
 			-- Error management
@@ -107,9 +122,12 @@ begin
 
 			-- Performe write if requested last cycle and no error occured
 			if SlaveOut.HRESP = '0' and lastwr = '1' then
-                    if lastaddr = x"00" then
-                        Background    <= SlaveIn.HWDATA;
-                    end if;
+				case lastaddr is
+					when x"00" => Background  <= SlaveIn.HWDATA;
+                    when x"01" => X1_Position <= SlaveIn.HWDATA;
+					when x"02" => Y1_Position <= SlaveIn.HWDATA;
+					when others =>
+				end case;
 			end if;
 
 			-- Check for transfer
@@ -117,9 +135,12 @@ begin
 				-- Read operation: retrieve data and fill empty spaces with '0'
 				if SlaveIn.HWRITE = '0' then
 					SlaveOut.HRDATA <= (others => '0');
-					if address = x"00" then
-                        SlaveOut.HRDATA    <= Background;
-                    end if;
+					case address is
+						when x"00" => SlaveOut.HRDATA <= Background;
+						when x"01" => SlaveOut.HRDATA <= X1_Position;
+						when x"02" => SlaveOut.HRDATA <= Y1_Position;
+						when others =>
+					end case;
 				end if;
 
 				-- Keep address and write command for next cycle
