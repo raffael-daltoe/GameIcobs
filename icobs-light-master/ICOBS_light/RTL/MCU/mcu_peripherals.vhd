@@ -43,6 +43,7 @@ entity mcu_peripherals is port (
 	periph_slvi_vec   		: in  MTS_vector;
 	periph_slvo_vec   		: out STM_vector;
 
+	--sw_mcu					: in std_logic_vector(11 downto 0);
 	-- GPIO
 	IOPA_READ 				: in  std_logic_vector(IOPA_LEN-1 downto 0);
 	IOPA_DOUT 				: out std_logic_vector(IOPA_LEN-1 downto 0);
@@ -224,6 +225,7 @@ architecture arch of mcu_peripherals is
 		HSEL             : in  std_logic;
 		HREADY           : in  std_logic;
 
+		sw				 : in std_logic_vector(11 downto 0);
 		-- Outputs of VGA 
 		vgaRed_ahblite   : OUT std_logic_vector(3 downto 0);
 		vgaGreen_ahblite : OUT std_logic_vector(3 downto 0);
@@ -306,6 +308,7 @@ begin
 		HSEL             => HSEL(CID_ENUM'pos(CID_MY_VGA)),
 		HREADY           => MasterIn.HREADYOUT,
 
+		sw				 => IOPA_READ(11 DOWNTO 0),
 		-- Outputs of VGA 
 		vgaRed_ahblite   => vgaRed_mcu,
 		vgaGreen_ahblite => vgaGreen_mcu,

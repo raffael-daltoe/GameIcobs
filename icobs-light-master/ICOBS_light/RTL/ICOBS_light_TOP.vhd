@@ -29,27 +29,29 @@ use interface.obi_lib.all;
 
 entity ICOBS_light_TOP is
     port (
-        EXTCLK       	: in  std_logic;
+        EXTCLK       			: in  std_logic;
 
-        HARDRESET    	: in  std_logic;
+        HARDRESET    			: in  std_logic;
 
-		IOPA            : inout std_logic_vector(IOPA_LEN-1 downto 0);
-		IOPB            : inout std_logic_vector(IOPB_LEN-1 downto 0);
-		IOPC            : inout std_logic_vector(IOPC_LEN-1 downto 0);
+		IOPA            		: inout std_logic_vector(IOPA_LEN-1 downto 0);
+		IOPB            		: inout std_logic_vector(IOPB_LEN-1 downto 0);
+		IOPC            		: inout std_logic_vector(IOPC_LEN-1 downto 0);
 
-		seg				: OUT std_logic_vector(0 to 6);
-		an				: OUT std_logic_vector(3 downto 0);
-		dp 				: OUT std_logic;
+		seg						: OUT std_logic_vector(0 to 6);
+		an						: OUT std_logic_vector(3 downto 0);
+		dp 						: OUT std_logic;
 
-		vgaRed_top_ICOBS			: OUT STD_LOGIC_VECTOR(3 downto 0);
+		vgaRed_top_ICOBS		: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaGreen_top_ICOBS    	: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaBLue_top_ICOBS  		: OUT STD_LOGIC_VECTOR(3 downto 0);
 	
-		Hsync_top_ICOBS 			: OUT STD_lOGIC;
- 		Vsync_top_ICOBS 			: OUT STD_lOGIC; 
+		--sw_top_ICOBS		    : in std_logic_vector(11 downto 0);
 
-		UART_RX			: in  std_logic;
-		UART_TX			: out std_logic);
+		Hsync_top_ICOBS 		: OUT STD_lOGIC;
+ 		Vsync_top_ICOBS 		: OUT STD_lOGIC; 
+
+		UART_RX					: in  std_logic;
+		UART_TX					: out std_logic);
     end;
 
 ----------------------------------------------------------------
@@ -83,6 +85,8 @@ architecture arch of ICOBS_light_TOP is
 
 		UART_RX			: in  std_logic;
 		UART_TX			: out std_logic;
+
+		--sw_top_mcu      : in std_logic_vector(11 downto 0);
 
 		vgaRed_top_mcu	 : OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaGreen_top_mcu : OUT STD_LOGIC_VECTOR(3 downto 0);
@@ -165,6 +169,8 @@ begin
 		UART_RX			=> UART_RX,
 		UART_TX			=> UART_TX,
 
+
+		--sw_top_mcu      => IOPA(11 downto 0),
 
 		vgaRed_top_mcu			=> vgaRed_top_ICOBS,
 		vgaGreen_top_mcu    	=> vgaGreen_top_ICOBS,

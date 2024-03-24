@@ -54,6 +54,8 @@ entity top_mcu is
 		an						: OUT std_logic_vector(3 downto 0);
 		dp 						: OUT std_logic;
 
+		--sw_top_mcu				: in std_logic_vector(11 downto 0);
+
 		vgaRed_top_mcu			: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaGreen_top_mcu    	: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaBLue_top_mcu  		: OUT STD_LOGIC_VECTOR(3 downto 0);
@@ -199,6 +201,7 @@ architecture arch of top_mcu is
 	    IRQ_FAST  				: out std_logic_vector(14 downto 0);
 	    BOOT_ADR				: out std_logic_vector(31 downto 0);
 
+		--sw_mcu	     			: in std_logic_vector(11 downto 0);
 	    -- Slave interface to connect PERIPH master
 	    periph_slvi_vec   		: in  MTS_vector;
 	    periph_slvo_vec   		: out STM_vector;
@@ -366,6 +369,8 @@ begin
 			vgaBLue_mcu  	 	=> vgaBLue_top_mcu,
 			Hsync_mcu    	 	=> Hsync_top_mcu,
 			Vsync_mcu    	 	=> Vsync_top_mcu,
+
+			--sw_mcu				=> sw_top_mcu,
 
 			UART_RX				=> UART_RX,
 			UART_TX				=> UART_TX,

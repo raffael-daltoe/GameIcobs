@@ -62,4 +62,23 @@ architecture Behavioral of icobs_tb is
         wait;
     end process;
 
+    -- Stimulus process to test IOPA values
+    stimulus: process
+    begin
+        -- Wait for reset to complete
+        wait for 500ns;
+
+        -- Test case 1: Set IOPA to a specific value
+        IOPA_s <= (others => '1');  -- Set all bits of IOPA to '1'
+        wait for 100ns;
+
+        -- Test case 2: Change IOPA to a different value
+        IOPA_s <= (others => '0');  -- Set all bits of IOPA to '0'
+        wait for 100ns;
+
+        -- Add more test cases as needed
+
+        wait;  -- Hold simulation
+    end process;
+
 end Behavioral;

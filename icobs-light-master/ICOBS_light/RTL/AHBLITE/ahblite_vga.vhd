@@ -19,6 +19,7 @@ port (
 	HSEL             : in  std_logic;
 	HREADY           : in  std_logic;
 
+	sw				 : in std_logic_vector(11 downto 0);
     -- Outputs of VGA 
     vgaRed_ahblite   : OUT std_logic_vector(3 downto 0);
     vgaGreen_ahblite : OUT std_logic_vector(3 downto 0);
@@ -53,6 +54,7 @@ architecture arch of ahblite_vga is
 	signal RST 	   : std_logic;
 
     signal Background : std_logic_vector(31 downto 0);
+	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
 
 
 ----------------------------------------------------------------
@@ -61,12 +63,13 @@ begin
     DTop_1: entity work.VGA_Display_Top port map(
             clk                => HCLK,
             btnR               => RST,
-            Hsync              => Hsync_ahblite
-            Vsync              => Vsync_ahblite
-            sw                 => Background (11 DOWNTO 0),
-            vgaRed_ahblite     => vgaRed_ahblite,
-            vgaGreen_ahblite   => vgaGreen_ahblite,
-            vgaBlue_ahblite    => vgaBLue_ahblite,
+            Hsync              => Hsync_ahblite,
+            Vsync              => Vsync_ahblite,
+            --sw                 => Background (11 DOWNTO 0),
+			sw				   => sw,
+            vgaRed		   	   => vgaRed_ahblite,
+            vgaGreen   		   => vgaGreen_ahblite,
+            vgaBlue   		   => vgaBLue_ahblite
        );
 
 	RST <= not HRESETn;
@@ -93,7 +96,9 @@ begin
 
 			-- Reset values
             Background <= (others => '0');
-
+			Y1_Position <= (others => '0');
+			X1_Position <= (others => '0');
+			
 		--------------------------------
 		elsif rising_edge(HCLK) then
 			-- Error management
