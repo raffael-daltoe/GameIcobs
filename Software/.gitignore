@@ -1,0 +1,9 @@
+~*
+*~
+*.d
+*.o
+*.log
+.vscode
+build
+riscv-gnu-toolchain
+compiler

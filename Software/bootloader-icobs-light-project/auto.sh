@@ -1,0 +1,8 @@
+cd /home/raffael/Desktop/Polytech/SEA8/archi2/VHDL/TP1/Software/demo-icobs-light-project
+make clean
+make all -j16
+cd /home/raffael/Desktop/Polytech/SEA8/archi2/VHDL/TP1/Software/Codeloader_ubuntu
+python3 code_loader.py \
+        /home/raffael/Desktop/Polytech/SEA8/archi2/VHDL/TP1/Software/demo-icobs-light-project/output/demo-icobs-light.hex \
+        /dev/ttyUSB1
+cd /home/raffael/Desktop/Polytech/SEA8/archi2/VHDL/TP1/Software/bootloader-icobs-light-project/
