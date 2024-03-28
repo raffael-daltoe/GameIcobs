@@ -1,22 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <inttypes.h>
 
 typedef struct
 {
-    int x;
-    int y;
+    __uint8_t x;
+    __uint8_t y;
 } Position;
 
-int points = 0;
-int totalPoints = 0;
-int running = 1;
+__uint8_t points = 0;
+__uint8_t totalPoints = 0;
+__uint8_t running = 1;
 
-void countPoints(char maze[10][20])
+static inline void countPoints(char maze[10][20])
 {
-    for (int i = 0; i < 10; i++)
+    for (__uint8_t i = 0; i < 10; i++)
     {
-        for (int j = 0; j < 20; j++)
+        for (__uint8_t j = 0; j < 20; j++)
         {
             if (maze[i][j] == '.')
             {
@@ -26,9 +27,9 @@ void countPoints(char maze[10][20])
     }
 }
 
-void movementPacman(char maze[10][20], int *posX, int *posY, char movement)
+static inline void movementPacman(char maze[10][20], __uint8_t *posX, __uint8_t *posY, char movement)
 {
-    int newPosX = *posX, newPosY = *posY;
+    __uint8_t newPosX = *posX, newPosY = *posY;
 
     switch (movement)
     {
@@ -59,7 +60,7 @@ void movementPacman(char maze[10][20], int *posX, int *posY, char movement)
     // To verify if the next position have a point
     if (maze[newPosY][newPosX] == '.')
     {
-        points++;                            // collect the point
+        points++; // collect the point
 
         maze[newPosY][newPosX] = ' '; // Remove de point of maze
     }
@@ -69,13 +70,59 @@ void movementPacman(char maze[10][20], int *posX, int *posY, char movement)
     *posY = newPosY;
 }
 
-void moveGhosts(char maze[10][20], Position ghost[], int numGhosts)
+static inline  __uint8_t isPositionOccupiedByGhost(Position ghosts[], __uint8_t numGhosts, __uint8_t x, __uint8_t y)
 {
-    for (int i = 0; i < numGhosts; i++)
+    for (__uint8_t i = 0; i < numGhosts; i++)
     {
-        int movement = rand() % 4; // to generate random movement 
-        int newPosX = ghost[i].x;
-        int newPosY = ghost[i].y;
+        if (ghosts[i].x == x && ghosts[i].y == y)
+        {
+            return 1; // Busy Position
+        }
+    }
+    return 0; // Free Position
+}
+
+static inline void moveGhosts(char maze[10][20], Position ghosts[], __uint8_t numGhosts, __uint8_t posX, __uint8_t posY, __uint8_t difficulty)
+{
+    for (__uint8_t i = 0; i < numGhosts; i++)
+    {
+        __uint8_t movement;
+        __uint8_t newPosX = ghosts[i].x;
+        __uint8_t newPosY = ghosts[i].y;
+
+        if (difficulty == 1)
+        { // Easy : random movement
+            movement = rand() % 4;
+        }
+        else if (difficulty == 2)
+        { // Medium : occasionally movement in direction to PACMAN
+            if (rand() % 4){ // 75% of chance of random movement, 25% of chance
+                                                            // to follow PACMAN
+                movement = rand() % 4;
+            }
+            else
+            {
+                if (abs(ghosts[i].x - posX) > abs(ghosts[i].y - posY))
+                {
+                    movement = ghosts[i].x > posX ? 2 : 3; // left or right
+                }
+                else
+                {
+                    movement = ghosts[i].y > posY ? 0 : 1; // above or below
+                }
+            }
+        }
+        else
+        { // Hard : movement smartest in direction to PACMAN
+            if (rand() % 2)
+            {                            // Alternance between axes X or Y
+                movement = newPosX > posX ? 2 : 3; // Left or Right 
+            }
+            else
+            {
+                movement = newPosY > posY ? 0 : 1; //  above or below
+            }
+        }
 
         switch (movement)
         {
@@ -93,18 +140,19 @@ void moveGhosts(char maze[10][20], Position ghost[], int numGhosts)
             break;
         }
 
-        // To verify if the next pos is valid (not is wall or PACMAN )
-        if (maze[newPosY][newPosX] != 'X')
+        // Verify if is valid the position of the ghost
+        if (maze[newPosY][newPosX] != 'X' && !isPositionOccupiedByGhost(ghosts, 
+                                                   numGhosts, newPosX, newPosY))
         {
-            ghost[i].x = newPosX;
-            ghost[i].y = newPosY;
+            ghosts[i].x = newPosX;
+            ghosts[i].y = newPosY;
         }
     }
 }
 
-int verifyCollision(Position ghost[], int numGhosts, int posX, int posY)
+static inline __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts, __uint8_t posX, __uint8_t posY)
 {
-    for (int i = 0; i < numGhosts; i++)
+    for (__uint8_t i = 0; i < numGhosts; i++)
     {
         if (ghost[i].x == posX && ghost[i].y == posY)
         {
@@ -114,7 +162,8 @@ int verifyCollision(Position ghost[], int numGhosts, int posX, int posY)
     return 0; // without collisions
 }
 
-int main() {
+int main()
+{
     char maze[10][20] = {
         "XXXXXXXXXXXXXXXXXXXX",
         "X..........XX......X",
@@ -125,22 +174,24 @@ int main() {
         "X....XX........XX..X",
         "X.XX.XXXXXX.XX.XX..X",
         "X..................X",
-        "XXXXXXXXXXXXXXXXXXXX"
-    };
+        "XXXXXXXXXXXXXXXXXXXX"};
 
-    int posX = 1, posY = 3; // Initial Position of PACMAN
+    __uint8_t posX = 1, posY = 3; // Initial Position of PACMAN
 
     countPoints(maze);
     srand(time(NULL));
 
     Position truePositions[200]; // Assumption with a max of 200 valid positions
-    int totalPositionsTrues = 0;
+    __uint8_t totalPositionsTrues = 0;
 
-    // Fill true Positions with positions other than walls, points, or the PACMAN 
+    //Fill true Positions with positions other than walls, points, or the PACMAN
     // starting position
-    for (int y = 0; y < 10; y++) {
-        for (int x = 0; x < 20; x++) {
-            if (maze[y][x] == '.' && !(x == posX && y == posY)) {
+    for (__uint8_t y = 0; y < 10; y++)
+    {
+        for (__uint8_t x = 0; x < 20; x++)
+        {
+            if (maze[y][x] == '.' && !(x == posX && y == posY))
+            {
                 truePositions[totalPositionsTrues].x = x;
                 truePositions[totalPositionsTrues].y = y;
                 totalPositionsTrues++;
@@ -148,37 +199,45 @@ int main() {
         }
     }
 
-    int numGhosts;
-    do {
+    __uint8_t numGhosts;
+    do
+    {
         printf("How much ghosts you want in the game?");
-        scanf("%d", &numGhosts);
-        if (numGhosts > totalPositionsTrues) {
+        scanf("%hhu", &numGhosts);
+        if (numGhosts > totalPositionsTrues)
+        {
             printf("Not is possible to position %d ghosts, because have only %d positions diponibles\n", numGhosts, totalPositionsTrues);
         }
     } while (numGhosts > totalPositionsTrues);
 
+    printf("What difficulty you want?(Number)\n");
+
+    __uint8_t difficulty;
+    scanf("%hhu",&difficulty);
+
     Position ghost[numGhosts];
 
     //  Place ghosts in valid random locations
-    for (int i = 0; i < numGhosts; i++) {
-        int randomPosition = rand() % totalPositionsTrues;
+    for (__uint8_t i = 0; i < numGhosts; i++)
+    {
+        __uint8_t randomPosition = rand() % totalPositionsTrues;
         ghost[i] = truePositions[randomPosition];
-        truePositions[randomPosition] = truePositions[--totalPositionsTrues]; 
-        // Replaces the used position with the last one in the list and 
+        truePositions[randomPosition] = truePositions[--totalPositionsTrues];
+        // Replaces the used position with the last one in the list and
         //              decrements the total
     }
 
     while (running)
     {
-        //system("clear"); // clear the terminal 
+        // system("clear"); // clear the terminal
 
         // draw the maze with ghost
-        for (int i = 0; i < 10; i++)
+        for (__uint8_t i = 0; i < 10; i++)
         {
-            for (int j = 0; j < 20; j++)
+            for (__uint8_t j = 0; j < 20; j++)
             {
-                int hereGhosts = 0;
-                for (int k = 0; k < numGhosts; k++)
+                __uint8_t hereGhosts = 0;
+                for (__uint8_t k = 0; k < numGhosts; k++)
                 {
                     if (ghost[k].x == j && ghost[k].y == i)
                     {
@@ -211,7 +270,7 @@ int main() {
             printf("You was taked by one ghost! End Game ~ N O B ~.\n");
             running = 0;
         }
-        moveGhosts(maze, ghost, numGhosts);
+        moveGhosts(maze, ghost, numGhosts, posX, posY, difficulty);
 
         // Verify the collisions with ghost
         if (verifyCollision(ghost, numGhosts, posX, posY))
