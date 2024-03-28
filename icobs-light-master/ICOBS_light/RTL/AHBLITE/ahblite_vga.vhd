@@ -19,7 +19,6 @@ port (
 	HSEL             : in  std_logic;
 	HREADY           : in  std_logic;
 
-	sw				 : in std_logic_vector(11 downto 0);
     -- Outputs of VGA 
     vgaRed_ahblite   : OUT std_logic_vector(3 downto 0);
     vgaGreen_ahblite : OUT std_logic_vector(3 downto 0);
@@ -48,43 +47,41 @@ architecture arch of ahblite_vga is
 	-- +--------+--------+---------------------------+
 	-- | OFFSET | NAME   | DESCRIPTION               |
 	-- +--------+--------+---------------------------+
-	-- |  x000  | Backgr | Basic R/W Register        |
+	-- |  0x00  | Backgr | Basic R/W Register        |
+	-- |  0x01  | X1_Pos | Basic R/W Register 		 |
+	-- |  0x02  | Y1_Pos | Basic R/W Register 	     |
 	-- +--------+--------+---------------------------+
 
 	signal RST 	   : std_logic;
 
     signal Background : std_logic_vector(31 downto 0);
 	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
-    --signal X1_Position, Y1_Position : std_logic;
+	signal X2_Position, Y2_Position : std_logic_vector(31 downto 0);
 
 ----------------------------------------------------------------
 begin
 
-    -- DTop_1: entity work.VGA_Display_Top port map(
-    --         clk                => HCLK,
-    --         btnR               => RST,
-    --         Hsync              => Hsync_ahblite,
-    --         Vsync              => Vsync_ahblite,
-    --         --sw                 => Background (11 DOWNTO 0),
-	-- 		sw				   => sw,
-    --         vgaRed		   	   => vgaRed_ahblite,
-    --         vgaGreen   		   => vgaGreen_ahblite,
-    --         vgaBlue   		   => vgaBLue_ahblite
-    --    );
-	VGA_ROM_TOP : entity work.VGA_TOP port map(
-		clk 		=>  HCLK,
-        btnC 		=>  RST,
-        Hsync 		=>  Hsync_ahblite,
-        Vsync 		=>  Vsync_ahblite,
-		btnU		=> 	Y1_Position(0),	-- above
-		btnD		=> 	Y1_Position(1),	-- below
-		btnR		=> 	X1_Position(0),	-- right
-		btnL		=> 	X1_Position(1),	-- left
-        vgaRed   	=>  vgaRed_ahblite,
-        vgaGreen 	=>  vgaGreen_ahblite,
-        vgaBlue  	=>  vgaBLue_ahblite
+     DTop_1: entity work.VGA_TOP port map(
+             clk                => HCLK,
+             btnC               => RST,
+             Hsync              => Hsync_ahblite,
+             Vsync              => Vsync_ahblite,
 
-	);
+             sw                 => Background (11 DOWNTO 0),
+             --btnU				=> 	Y1_Position(0),	-- above
+             --btnD				=> 	Y1_Position(1),	-- below
+             --btnR				=> 	X1_Position(0),	-- right
+             --btnL				=> 	X1_Position(1),	-- left
+			 Y_IN 				=> Y1_Position(9 downto 0),
+			 X_IN 				=> X1_Position(9 downto 0),
+                
+             Y2_IN              => Y2_Position(9 downto 0),
+             X2_IN              => X2_Position(9 downto 0),
+                
+             vgaRed		   	    => vgaRed_ahblite,
+             vgaGreen   		=> vgaGreen_ahblite,
+             vgaBlue   		    => vgaBLue_ahblite
+        );
 
 	RST <= not HRESETn;
 
@@ -112,8 +109,8 @@ begin
             Background <= (others => '0');
 			Y1_Position <= (others => '0');
 			X1_Position <= (others => '0');
-			--Y1_Position <= '0';
-			--X1_Position <= '0';
+			Y2_Position <= (others => '0');
+			X2_Position <= (others => '0');
 		--------------------------------
 		elsif rising_edge(HCLK) then
 			-- Error management
@@ -126,6 +123,8 @@ begin
 					when x"00" => Background  <= SlaveIn.HWDATA;
                     when x"01" => X1_Position <= SlaveIn.HWDATA;
 					when x"02" => Y1_Position <= SlaveIn.HWDATA;
+					when x"03" => X2_Position <= SlaveIn.HWDATA;
+					when x"04" => Y2_Position <= SlaveIn.HWDATA;
 					when others =>
 				end case;
 			end if;
@@ -139,6 +138,8 @@ begin
 						when x"00" => SlaveOut.HRDATA <= Background;
 						when x"01" => SlaveOut.HRDATA <= X1_Position;
 						when x"02" => SlaveOut.HRDATA <= Y1_Position;
+						when x"03" => SlaveOut.HRDATA <= X2_Position;
+						when x"04" => SlaveOut.HRDATA <= Y2_Position;
 						when others =>
 					end case;
 				end if;

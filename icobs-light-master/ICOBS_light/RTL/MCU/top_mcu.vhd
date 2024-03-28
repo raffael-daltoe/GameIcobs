@@ -54,8 +54,6 @@ entity top_mcu is
 		an						: OUT std_logic_vector(3 downto 0);
 		dp 						: OUT std_logic;
 
-		--sw_top_mcu				: in std_logic_vector(11 downto 0);
-
 		vgaRed_top_mcu			: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaGreen_top_mcu    	: OUT STD_LOGIC_VECTOR(3 downto 0);
 		vgaBLue_top_mcu  		: OUT STD_LOGIC_VECTOR(3 downto 0);

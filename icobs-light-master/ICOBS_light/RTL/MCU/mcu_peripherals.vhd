@@ -225,7 +225,6 @@ architecture arch of mcu_peripherals is
 		HSEL             : in  std_logic;
 		HREADY           : in  std_logic;
 
-		sw				 : in std_logic_vector(11 downto 0);
 		-- Outputs of VGA 
 		vgaRed_ahblite   : OUT std_logic_vector(3 downto 0);
 		vgaGreen_ahblite : OUT std_logic_vector(3 downto 0);
@@ -308,7 +307,13 @@ begin
 		HSEL             => HSEL(CID_ENUM'pos(CID_MY_VGA)),
 		HREADY           => MasterIn.HREADYOUT,
 
-		sw				 => IOPA_READ(11 DOWNTO 0),
+		--btnu 			=>	IOPC(0),				-- IOPC[0] = BTNU
+		--btnl 			=>	IOPC(1),				-- IOPC[1] = BTNL
+		--btnr 			=>	IOPC(2),				-- IOPC[2] = BTNR
+		--btnd 			=>	IOPC(3),				-- IOPC[3] = BTND
+
+
+		--sw				 => IOPA_READ(15 DOWNTO 0),
 		-- Outputs of VGA 
 		vgaRed_ahblite   => vgaRed_mcu,
 		vgaGreen_ahblite => vgaGreen_mcu,
