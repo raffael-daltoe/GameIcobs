@@ -6,115 +6,116 @@ typedef struct
 {
     int x;
     int y;
-} Posicao;
+} Position;
 
-int pontos = 0;
-int pontosTotais = 0;
-int rodando = 1;
+int points = 0;
+int totalPoints = 0;
+int running = 1;
 
-void contarPontosTotais(char labirinto[10][20])
+void countPoints(char maze[10][20])
 {
     for (int i = 0; i < 10; i++)
     {
         for (int j = 0; j < 20; j++)
         {
-            if (labirinto[i][j] == '.')
+            if (maze[i][j] == '.')
             {
-                pontosTotais++;
+                totalPoints++;
             }
         }
     }
 }
 
-void movimentarPacman(char labirinto[10][20], int *posX, int *posY, char movimento)
+void movementPacman(char maze[10][20], int *posX, int *posY, char movement)
 {
-    int novaPosX = *posX, novaPosY = *posY;
+    int newPosX = *posX, newPosY = *posY;
 
-    switch (movimento)
+    switch (movement)
     {
     case 'w':
-        novaPosY--;
+        newPosY--;
         break;
     case 's':
-        novaPosY++;
+        newPosY++;
         break;
     case 'a':
-        novaPosX--;
+        newPosX--;
         break;
     case 'd':
-        novaPosX++;
+        newPosX++;
         break;
     default:
-        printf("Tecla inválida.\n");
+        printf("Invalid key.\n");
         return;
     }
 
-    // Verificar se a próxima posição é uma parede ou fantasma
-    if (labirinto[novaPosY][novaPosX] == 'X')
+    // To Verify if the next pos is a wall or ghost
+    if (maze[newPosY][newPosX] == 'X')
     {
-        printf("Movimento inválido! Parede.\n");
+        printf("Invalid Movement ! Wall .\n");
         return;
     }
 
-    // Verificar se a próxima posição tem um ponto
-    if (labirinto[novaPosY][novaPosX] == '.')
+    // To verify if the next position have a point
+    if (maze[newPosY][newPosX] == '.')
     {
-        pontos++;                            // Coletar ponto
-        labirinto[novaPosY][novaPosX] = ' '; // Remover ponto do labirinto
+        points++;                            // collect the point
+
+        maze[newPosY][newPosX] = ' '; // Remove de point of maze
     }
 
-    // Atualizar a posição do PACMAN
-    *posX = novaPosX;
-    *posY = novaPosY;
+    // Update the pos of PACMAN
+    *posX = newPosX;
+    *posY = newPosY;
 }
 
-void movimentarFantasmas(char labirinto[10][20], Posicao fantasmas[], int numFantasmas)
+void moveGhosts(char maze[10][20], Position ghost[], int numGhosts)
 {
-    for (int i = 0; i < numFantasmas; i++)
+    for (int i = 0; i < numGhosts; i++)
     {
-        int movimento = rand() % 4; // Gerar movimento aleatório
-        int novaPosX = fantasmas[i].x;
-        int novaPosY = fantasmas[i].y;
+        int movement = rand() % 4; // to generate random movement 
+        int newPosX = ghost[i].x;
+        int newPosY = ghost[i].y;
 
-        switch (movimento)
+        switch (movement)
         {
         case 0:
-            novaPosY--;
+            newPosY--;
             break;
         case 1:
-            novaPosY++;
+            newPosY++;
             break;
         case 2:
-            novaPosX--;
+            newPosX--;
             break;
         case 3:
-            novaPosX++;
+            newPosX++;
             break;
         }
 
-        // Verificar se a próxima posição é válida (não é parede nem PACMAN)
-        if (labirinto[novaPosY][novaPosX] != 'X')
+        // To verify if the next pos is valid (not is wall or PACMAN )
+        if (maze[newPosY][newPosX] != 'X')
         {
-            fantasmas[i].x = novaPosX;
-            fantasmas[i].y = novaPosY;
+            ghost[i].x = newPosX;
+            ghost[i].y = newPosY;
         }
     }
 }
 
-int verificarColisao(Posicao fantasmas[], int numFantasmas, int posX, int posY)
+int verifyCollision(Position ghost[], int numGhosts, int posX, int posY)
 {
-    for (int i = 0; i < numFantasmas; i++)
+    for (int i = 0; i < numGhosts; i++)
     {
-        if (fantasmas[i].x == posX && fantasmas[i].y == posY)
+        if (ghost[i].x == posX && ghost[i].y == posY)
         {
-            return 1; // Colisão detectada
+            return 1; // Collision detected
         }
     }
-    return 0; // Sem colisões
+    return 0; // without collisions
 }
 
 int main() {
-    char labirinto[10][20] = {
+    char maze[10][20] = {
         "XXXXXXXXXXXXXXXXXXXX",
         "X..........XX......X",
         "X.XXXXX.XX.XXXXXX..X",
@@ -127,93 +128,96 @@ int main() {
         "XXXXXXXXXXXXXXXXXXXX"
     };
 
-    int posX = 1, posY = 3; // Posição inicial do PACMAN
+    int posX = 1, posY = 3; // Initial Position of PACMAN
 
-    contarPontosTotais(labirinto);
+    countPoints(maze);
     srand(time(NULL));
 
-    Posicao posicoesValidas[200]; // Assumindo um máximo de 200 posições válidas
-    int totalPosicoesValidas = 0;
+    Position truePositions[200]; // Assumption with a max of 200 valid positions
+    int totalPositionsTrues = 0;
 
-    // Preencher posicoesValidas com posições que não sejam paredes, pontos, ou a posição inicial do PACMAN
+    // Fill true Positions with positions other than walls, points, or the PACMAN 
+    // starting position
     for (int y = 0; y < 10; y++) {
         for (int x = 0; x < 20; x++) {
-            if (labirinto[y][x] == '.' && !(x == posX && y == posY)) {
-                posicoesValidas[totalPosicoesValidas].x = x;
-                posicoesValidas[totalPosicoesValidas].y = y;
-                totalPosicoesValidas++;
+            if (maze[y][x] == '.' && !(x == posX && y == posY)) {
+                truePositions[totalPositionsTrues].x = x;
+                truePositions[totalPositionsTrues].y = y;
+                totalPositionsTrues++;
             }
         }
     }
 
-    int numFantasmas;
+    int numGhosts;
     do {
-        printf("Quantos fantasmas você deseja no jogo? ");
-        scanf("%d", &numFantasmas);
-        if (numFantasmas > totalPosicoesValidas) {
-            printf("Não é possível posicionar %d fantasmas, pois só há %d posições disponíveis.\n", numFantasmas, totalPosicoesValidas);
+        printf("How much ghosts you want in the game?");
+        scanf("%d", &numGhosts);
+        if (numGhosts > totalPositionsTrues) {
+            printf("Not is possible to position %d ghosts, because have only %d positions diponibles\n", numGhosts, totalPositionsTrues);
         }
-    } while (numFantasmas > totalPosicoesValidas);
+    } while (numGhosts > totalPositionsTrues);
 
-    Posicao fantasmas[numFantasmas];
+    Position ghost[numGhosts];
 
-    // Posicionar os fantasmas em locais aleatórios válidos
-    for (int i = 0; i < numFantasmas; i++) {
-        int posicaoAleatoria = rand() % totalPosicoesValidas;
-        fantasmas[i] = posicoesValidas[posicaoAleatoria];
-        posicoesValidas[posicaoAleatoria] = posicoesValidas[--totalPosicoesValidas]; // Substitui a posição usada pela última na lista e decrementa o total
+    //  Place ghosts in valid random locations
+    for (int i = 0; i < numGhosts; i++) {
+        int randomPosition = rand() % totalPositionsTrues;
+        ghost[i] = truePositions[randomPosition];
+        truePositions[randomPosition] = truePositions[--totalPositionsTrues]; 
+        // Replaces the used position with the last one in the list and 
+        //              decrements the total
     }
 
-    while (rodando)
+    while (running)
     {
-        system("clear"); // Limpar a tela (use "cls" no Windows)
+        //system("clear"); // clear the terminal 
 
-        // Desenhar o labirinto com fantasmas
+        // draw the maze with ghost
         for (int i = 0; i < 10; i++)
         {
             for (int j = 0; j < 20; j++)
             {
-                int fantasmaAqui = 0;
-                for (int k = 0; k < numFantasmas; k++)
+                int hereGhosts = 0;
+                for (int k = 0; k < numGhosts; k++)
                 {
-                    if (fantasmas[k].x == j && fantasmas[k].y == i)
+                    if (ghost[k].x == j && ghost[k].y == i)
                     {
                         printf("F");
-                        fantasmaAqui = 1;
+                        hereGhosts = 1;
                         break;
                     }
                 }
-                if (!fantasmaAqui)
+                if (!hereGhosts)
                 {
                     if (i == posY && j == posX)
                         printf("P");
                     else
-                        printf("%c", labirinto[i][j]);
+                        printf("%c", maze[i][j]);
                 }
             }
             printf("\n");
         }
-        printf("Pontos: %d\n", pontos);
+        printf("Points: %d\n", points);
 
-        // Capturar entrada do usuário e mover o PACMAN
-        char movimento;
-        printf("Mova o PACMAN (w/a/s/d): ");
-        scanf(" %c", &movimento);
+        // Capture user input and move PACMAN
+        char movement;
+        printf("Movement of PACMAN (w/a/s/d): ");
+        scanf(" %c", &movement);
 
-        movimentarPacman(labirinto, &posX, &posY, movimento);
-        // Verificar colisões com fantasmas
-        if (verificarColisao(fantasmas, numFantasmas, posX, posY))
+        movementPacman(maze, &posX, &posY, movement);
+        // Verify the collisions with ghost
+        if (verifyCollision(ghost, numGhosts, posX, posY))
         {
-            printf("Você foi pego por um fantasma! Fim de jogo.\n");
-            rodando = 0;
+            printf("You was taked by one ghost! End Game ~ N O B ~.\n");
+            running = 0;
         }
-        movimentarFantasmas(labirinto, fantasmas, numFantasmas);
+        moveGhosts(maze, ghost, numGhosts);
 
-        // Verificar colisões com fantasmas
-        if (verificarColisao(fantasmas, numFantasmas, posX, posY))
+        // Verify the collisions with ghost
+        if (verifyCollision(ghost, numGhosts, posX, posY))
         {
-            printf("Você foi pego por um fantasma! Fim de jogo.\n");
-            rodando = 0;
+            printf("You was taked by one ghost! End Game ~ N O B ~.\n");
+            running = 0;
         }
     }
 
