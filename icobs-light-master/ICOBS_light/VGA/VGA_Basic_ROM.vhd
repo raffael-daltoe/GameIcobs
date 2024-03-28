@@ -14,12 +14,11 @@ ENTITY VGA_Basic_ROM IS
         R2  : in unsigned(9 downto 0);
         C2  : in unsigned(9 downto 0);
         
-        --rom_addr4 : OUT vector16;
         rom_addr4 : out std_logic_vector(12 downto 0);
         M : in vector12;
         
         M_2_sprite : in vector12;
-        --rom_addr4_2_sprite : out vector16;
+        
         rom_addr4_2_sprite : out std_logic_vector(12 downto 0);
         red : OUT vector4;
         green : OUT vector4;
@@ -35,8 +34,8 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     CONSTANT h : unsigned(9 DOWNTO 0) := to_unsigned(90, 10);
     
 
-    CONSTANT w2 : unsigned(9 DOWNTO 0) := to_unsigned(101, 10);      -- crash
-    CONSTANT h2 : unsigned(9 DOWNTO 0) := to_unsigned(72, 10);
+    CONSTANT w2 : unsigned(9 DOWNTO 0) := to_unsigned(90, 10);      -- cr
+    CONSTANT h2 : unsigned(9 DOWNTO 0) := to_unsigned(90, 10);
     
     
     --SIGNAL xpix, ypix, R1, C1 : unsigned(9 DOWNTO 0);
@@ -46,12 +45,6 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     --SIGNAL r2,c2 : vector10;
 
 BEGIN
-    --r2 <= sw(11 DOWNTO 6) & "0000";
-    --c2 <= sw(5 DOWNTO 0) & "0000";
-    --R1 <= unsigned(r2);
-    --C1 <= unsigned(c2);
-    --R1 <= unsigned(X);
-    --C1 <= unsigned(Y);
 
     xpix <= unsigned(hc) - (hbp + C1);
     ypix <= unsigned(vc) - (vbp + R1);
@@ -63,7 +56,7 @@ BEGIN
     rom_addr_s <= STD_LOGIC_VECTOR(TotalPixels(ypix, w) + xpix);
     rom_addr4 <= rom_addr_s(12 downto 0);
     
-    rom_addr_s_2_sprite <= STD_LOGIC_VECTOR(TotalPixels(ypix2,w) + xpix2);
+    rom_addr_s_2_sprite <= STD_LOGIC_VECTOR(TotalPixels(ypix2,w2) + xpix2);
     rom_addr4_2_sprite <= rom_addr_s_2_sprite(12 downto 0);
     
     spriteon <= '1' WHEN (unsigned(hc) >= C1 + hbp AND unsigned(hc) < C1 + hbp + w AND

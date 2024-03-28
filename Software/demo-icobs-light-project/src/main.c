@@ -132,12 +132,44 @@ int main(void)
 	MY_VGA.Background=0x0;
 	MY_VGA.X2_Position=320;
 	MY_VGA.Y2_Position=400;
-	while(1){
+	while(1){ 
 		delay_ms(1);
-		if(BTNR && MY_VGA.Y1_Position  <  400)MY_VGA.Y1_Position++; 						  // right
-		if(BTNL  && MY_VGA.Y1_Position >  0)MY_VGA.Y1_Position--;							  // left 
-		if(BTNU && MY_VGA.X1_Position  >  0)MY_VGA.X1_Position--;							  // down
-		if(BTND && MY_VGA.X1_Position  <  320 )MY_VGA.X1_Position++;						  // above
+// Mover para a direita, garantindo que não ultrapasse a borda esquerda da segunda imagem
+if(BTNR && MY_VGA.Y1_Position < 558) {
+    if(!(MY_VGA.Y1_Position + 80 >= MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 && 
+       ((MY_VGA.X1_Position + 90 > MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90) || 
+       (MY_VGA.X1_Position < MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 90 > MY_VGA.X2_Position)))) {
+        MY_VGA.Y1_Position++;
+    }
+}
+
+// Mover para a esquerda, garantindo que não ultrapasse a borda direita da segunda imagem
+if(BTNL && MY_VGA.Y1_Position > 0) {
+    if(!(MY_VGA.Y1_Position <= MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 80 > MY_VGA.Y2_Position && 
+       ((MY_VGA.X1_Position + 90 > MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90) || 
+       (MY_VGA.X1_Position < MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 90 > MY_VGA.X2_Position)))) {
+        MY_VGA.Y1_Position--;
+    }
+}
+
+// Mover para cima, garantindo que não ultrapasse a borda inferior da segunda imagem
+if(BTNU && MY_VGA.X1_Position > 0) {
+    if(!(MY_VGA.X1_Position <= MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 90 > MY_VGA.X2_Position && 
+       ((MY_VGA.Y1_Position + 80 > MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90) || 
+       (MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 80 > MY_VGA.Y2_Position)))) {
+        MY_VGA.X1_Position--;
+    }
+}
+
+// Mover para baixo, garantindo que não ultrapasse a borda superior da segunda imagem
+if(BTND && MY_VGA.X1_Position < 390) {
+    if(!(MY_VGA.X1_Position + 90 >= MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90 && 
+       ((MY_VGA.Y1_Position + 80 > MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90) || 
+       (MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 80 > MY_VGA.Y2_Position)))) {
+        MY_VGA.X1_Position++;
+    }
+}
+		  // above
 
 
 

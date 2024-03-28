@@ -68,7 +68,7 @@ END GROUP
                 0x0000000000002000                __STACK_SIZE = 0x2000
                 0x0000000000002000                __HEAP_SIZE = 0x2000
 
-.text           0x0000000010000000     0x1890
+.text           0x0000000010000000     0x1a70
  *(.vectors)
  .vectors       0x0000000010000000       0x8c build/crt0.S.o
  *(.text)
@@ -120,11 +120,11 @@ END GROUP
                 0x0000000010001050                IRQ_00_Handler
  .text.timer_clock_cb
                 0x00000000100010de       0x1e build/src/main.c.o
- .text.main     0x00000000100010fc      0x58c build/src/main.c.o
+ .text.main     0x00000000100010fc      0x76c build/src/main.c.o
                 0x00000000100010fc                main
  .text.Default_Handler
-                0x0000000010001688       0x1c build/src/main.c.o
-                0x0000000010001688                Default_Handler
+                0x0000000010001868       0x1c build/src/main.c.o
+                0x0000000010001868                Default_Handler
  *(.init)
  *(.fini)
  *crtbegin.o(.ctors)
@@ -140,27 +140,27 @@ END GROUP
  *(.lit)
  *(.shdata)
  *(.rodata)
- *fill*         0x00000000100016a4        0x0 
- .rodata        0x00000000100016a4       0x16 build/src/main.c.o
- *fill*         0x00000000100016ba        0x2 
- .rodata        0x00000000100016bc      0x100 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_clz.o)
-                0x00000000100016bc                __clz_tab
+ *fill*         0x0000000010001884        0x0 
+ .rodata        0x0000000010001884       0x16 build/src/main.c.o
+ *fill*         0x000000001000189a        0x2 
+ .rodata        0x000000001000189c      0x100 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_clz.o)
+                0x000000001000189c                __clz_tab
  *(.rodata.*)
  .rodata.vprint
-                0x00000000100017bc       0x84 build/lib/misc/print.c.o
+                0x000000001000199c       0x84 build/lib/misc/print.c.o
  *(.eh_frame*)
- .eh_frame      0x0000000010001840       0x28 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_udivdi3.o)
- .eh_frame      0x0000000010001868       0x28 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_umoddi3.o)
+ .eh_frame      0x0000000010001a20       0x28 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_udivdi3.o)
+ .eh_frame      0x0000000010001a48       0x28 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a(_umoddi3.o)
  *(.shbss)
 
-.rela.dyn       0x0000000010001890        0x0
+.rela.dyn       0x0000000010001a70        0x0
  .rela.text.Reset_Handler
-                0x0000000010001890        0x0 build/crt0.S.o
- .rela.vectors  0x0000000010001890        0x0 build/crt0.S.o
-                0x0000000010001890                . = ALIGN (0x4)
-                0x0000000010001890                _text_end = .
+                0x0000000010001a70        0x0 build/crt0.S.o
+ .rela.vectors  0x0000000010001a70        0x0 build/crt0.S.o
+                0x0000000010001a70                . = ALIGN (0x4)
+                0x0000000010001a70                _text_end = .
 
-.data           0x0000000010010000        0x0 load address 0x0000000010001890
+.data           0x0000000010010000        0x0 load address 0x0000000010001a70
                 0x0000000010010000                _data_start = .
  *(vtable)
  *(.data)

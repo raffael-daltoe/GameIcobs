@@ -32,8 +32,8 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        --SIGNAL addr,addr_2_sprite : vector16;
        signal addr, addr_2_sprite : std_logic_vector(12 downto 0);
        SIGNAL R1,C1,R2,C2 : unsigned(9 downto 0);
-       signal X1_TOP, Y1_TOP : unsigned(9 downto 0);
-       signal X2_TOP, Y2_TOP : unsigned(9 downto 0);
+       --signal X1_TOP, Y1_TOP : unsigned(9 downto 0);
+       --signal X2_TOP, Y2_TOP : unsigned(9 downto 0);
        
 BEGIN
     U1 : ENTITY work.VGA_Clock PORT MAP (mclk => clk, reset => rst,clk25 => clk25);
@@ -51,17 +51,17 @@ BEGIN
     
     U4 : ENTITY work.prom_sprite port map(clka => clk25,addra => addr, douta => M );  -- crash 80x90 | 7200
     U5 : ENTITY work.VGA_Clock100hz generic map (N => 19)  port map(clk_in => clk,rst => rst, clk_out => clk100 );
-    U6 : ENTITY work.Mover_A port map( X_IN => X1_TOP , Y_IN => Y1_TOP, C1 => C1 , R1 => R1);
-    U7 : ENTITY work.prom_sprite2 port map(clka => clk25, addra => addr_2_sprite , douta => M_2_sprite);   -- crazy 101x72 | 7272
-    U8 : ENTITY work.Mover_A port map( X_IN => X2_TOP , Y_IN => Y2_TOP , C1 => C2 , R1 => R2);
+    --U6 : ENTITY work.Mover_A port map( X_IN => X1_TOP , Y_IN => Y1_TOP, C1 => C1 , R1 => R1);
+    U7 : ENTITY work.prom_sprite2 port map(clka => clk25, addra => addr_2_sprite , douta => M_2_sprite);   -- coffe 90x90 | 8100
+    --U8 : ENTITY work.Mover_A port map( X_IN => X2_TOP , Y_IN => Y2_TOP , C1 => C2 , R1 => R2);
 
 
     --U6 : ENTITY work.Mover_A port map(clk => clk100, rst => rst, R1 => R1, C1 => C1,btnD => btnD, btnU => btnU, btnL => btnL, btnR => btnR);
     --U4 : ENTITY work.Basic_ROM PORT MAP (addr => addr, M => M);
     rst <= btnC;
-    X1_TOP <= to_unsigned(to_integer(unsigned(X_IN)), X_IN'length);
-    Y1_TOP <= to_unsigned(to_integer(unsigned(Y_IN)), X_IN'length);
+    C1 <= to_unsigned(to_integer(unsigned(X_IN)), X_IN'length);
+    R1 <= to_unsigned(to_integer(unsigned(Y_IN)), X_IN'length);
     
-    X2_TOP <= to_unsigned(to_integer(unsigned(X2_IN)), X2_IN'length);
-    Y2_TOP <= to_unsigned(to_integer(unsigned(Y2_IN)), Y2_IN'length);
+    C2 <= to_unsigned(to_integer(unsigned(X2_IN)), X2_IN'length);
+    R2 <= to_unsigned(to_integer(unsigned(Y2_IN)), Y2_IN'length);
 END Behavioral;
