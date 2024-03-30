@@ -1,0 +1,165 @@
+
+Discarded input sections
+
+ .text          0x0000000000000000        0x8 build/crt0.S.o
+ .data          0x0000000000000000        0x0 build/crt0.S.o
+ .bss           0x0000000000000000        0x0 build/crt0.S.o
+ .data          0x0000000000000000        0x0 /tmp/cc5vbcGG.ltrans0.ltrans.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x0000000010000000 0x0000000000010000 xr
+RAM              0x0000000010010000 0x0000000000010000 w
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD build/crt0.S.o
+LOAD build/lib/misc/print.c.o
+LOAD /tmp/cc5vbcGG.ltrans0.ltrans.o
+LOAD build/lib/libarch/uart.c.o
+LOAD build/lib/libarch/timer.c.o
+LOAD build/src/main.c.o
+START GROUP
+LOAD /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a
+LOAD /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a
+LOAD /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libm_nano.a
+LOAD /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/libgcc.a
+LOAD /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libsupc++.a
+END GROUP
+                0x0000000010000000                __ROM_BASE = 0x10000000
+                0x0000000000010000                __ROM_SIZE = 0x10000
+                0x0000000010010000                __RAM_BASE = 0x10010000
+                0x0000000000010000                __RAM_SIZE = 0x10000
+                0x0000000000002000                __STACK_SIZE = 0x2000
+                0x0000000000002000                __HEAP_SIZE = 0x2000
+
+.text           0x0000000010000000      0xdea
+ *(.vectors)
+ .vectors       0x0000000010000000       0x8c build/crt0.S.o
+ *(.text)
+ .text          0x000000001000008c      0x64a /tmp/cc5vbcGG.ltrans0.ltrans.o
+                0x0000000010000564                IRQ_04_Handler
+                0x0000000010000656                IRQ_00_Handler
+                0x00000000100006c8                Default_Handler
+ *(.text.*)
+ .text.Reset_Handler
+                0x00000000100006d6       0x62 build/crt0.S.o
+                0x00000000100006d6                Reset_Handler
+ .text.Default_Handler
+                0x0000000010000738        0x2 build/crt0.S.o
+                0x0000000010000738                IRQ_08_Handler
+                0x0000000010000738                IRQ_06_Handler
+                0x0000000010000738                IRQ_11_Handler
+                0x0000000010000738                IRQ_10_Handler
+                0x0000000010000738                IRQ_07_Handler
+                0x0000000010000738                IRQ_01_Handler
+                0x0000000010000738                IRQ_13_Handler
+                0x0000000010000738                IRQ_14_Handler
+                0x0000000010000738                IRQ_02_Handler
+                0x0000000010000738                IRQ_05_Handler
+                0x0000000010000738                IRQ_NMI_Handler
+                0x0000000010000738                IRQ_09_Handler
+                0x0000000010000738                IRQ_03_Handler
+                0x0000000010000738                IRQ_12_Handler
+ .text.startup  0x000000001000073a      0x616 /tmp/cc5vbcGG.ltrans0.ltrans.o
+                0x000000001000073a                main
+ *(.init)
+ *(.fini)
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o *crtend?.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o *crtend?.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+ *(.lit)
+ *(.shdata)
+ *(.rodata)
+ *fill*         0x0000000010000d50        0x0 
+ .rodata        0x0000000010000d50       0x84 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ *(.rodata.*)
+ .rodata.str1.4
+                0x0000000010000dd4       0x16 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ *(.eh_frame*)
+ *(.shbss)
+
+.rela.dyn       0x0000000010000dec        0x0
+ .rela.text.Reset_Handler
+                0x0000000010000dec        0x0 build/crt0.S.o
+ .rela.vectors  0x0000000010000dec        0x0 build/crt0.S.o
+                0x0000000010000dec                . = ALIGN (0x4)
+                0x0000000010000dec                _text_end = .
+
+.data           0x0000000010010000        0x0 load address 0x0000000010000dec
+                0x0000000010010000                _data_start = .
+ *(vtable)
+ *(.data)
+ *(.data.*)
+ *(.sdata)
+ *(.sdata.*)
+                0x0000000010010000                . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+                0x0000000010010000                . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_NAME(.init_array.*))
+ *(.init_array)
+                [!provide]                        PROVIDE (__init_array_end = .)
+                0x0000000010010000                . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_NAME(.fini_array.*))
+ *(.fini_array)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+ *(.jcr*)
+                0x0000000010010000                . = ALIGN (0x4)
+                0x0000000010010000                _data_end = .
+
+.bss            0x0000000010010000       0xc0
+                0x0000000010010000                . = ALIGN (0x4)
+                0x0000000010010000                _bss_start = .
+ *(.bss)
+ .bss           0x0000000010010000       0xa0 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ *(.bss.*)
+ *(.sbss)
+ .sbss          0x00000000100100a0       0x20 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ *(.sbss.*)
+ *(COMMON)
+                0x00000000100100c0                . = ALIGN (0x4)
+                0x00000000100100c0                _bss_end = .
+
+.heap           0x00000000100100c0     0x2000
+                0x00000000100100c0                . = ALIGN (0x8)
+                0x00000000100100c0                __end__ = .
+                0x00000000100100c0                _end = .
+                [!provide]                        PROVIDE (end = .)
+                0x00000000100120c0                . = (. + __HEAP_SIZE)
+ *fill*         0x00000000100100c0     0x2000 
+                0x00000000100120c0                . = ALIGN (0x8)
+                0x00000000100120c0                __HeapLimit = .
+
+.stack          0x000000001001e000     0x2000
+                0x000000001001e000                . = ALIGN (0x8)
+                0x000000001001e000                __StackLimit = .
+                0x0000000010020000                . = (. + __STACK_SIZE)
+ *fill*         0x000000001001e000     0x2000 
+                0x0000000010020000                . = ALIGN (0x8)
+                0x0000000010020000                __StackTop = .
+                0x0000000010020000                PROVIDE (__stack = __StackTop)
+OUTPUT(output/demo-icobs-light.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x0000000000000000       0x2a
+ .riscv.attributes
+                0x0000000000000000       0x24 build/crt0.S.o
+ .riscv.attributes
+                0x0000000000000024       0x2a /tmp/cc5vbcGG.ltrans0.ltrans.o
+
+.comment        0x0000000000000000       0x12
+ .comment       0x0000000000000000       0x12 /tmp/cc5vbcGG.ltrans0.ltrans.o
+                                         0x13 (size before relaxing)

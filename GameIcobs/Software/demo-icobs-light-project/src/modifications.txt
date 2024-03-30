@@ -1,0 +1,11 @@
+28/03->  Added in the makefile the flags -flto and -O3
+-flto: Enables Link-Time Optimization, which allows the compiler to perform optimizations across all compilation units during the link stage.
+-ffunction-sections and -fdata-sections: Place each function or data item into its own section in the output file, which can enable the linker to remove unused sections and potentially reduce the size of the executable.
+
+Map    = 280x155 and size Port A = 43400    -> compress 0.9 and 12
+Food   = 27x18 and size Port A = 486        -> compress 0.03 and 12
+Pacman = 45x45 and size Port A = 2025       -> compress 1 and 12
+Ghost  = 40x40 and size Port A = 1600       -> compress 1 and 12
+
+
+Eu não estava conseguindo replicar a imagem no mesmo eixo X mas no eixo Y em baixo pois a ROM estava pegando um endereço que não valor correto. Então criei o process para poder coletar o endereço correto.
