@@ -9,6 +9,7 @@ PACKAGE packages IS
     subtype vector10 is std_logic_vector(9 downto 0);
     subtype vector4 is std_logic_vector(3 downto 0);
     subtype vector7 is std_logic_vector(6 downto 0);
+    subtype vector8 is std_logic_vector(7 downto 0);
     subtype vector11 is std_logic_vector(10 downto 0);
     subtype vector12 is std_logic_vector(11 downto 0);
     subtype vector16 is std_logic_vector(15 downto 0);
@@ -67,18 +68,87 @@ PACKAGE packages IS
      constant vbp:       unsigned(N-1 downto 0) := to_unsigned(VERTICAL_PULSE + VERTICAL_BP, N ); -- 31
      constant vfp:       unsigned(N-1 downto 0) := to_unsigned(VGA_HEIGHT + VERTICAL_PULSE + VERTICAL_BP, N); -- 530
      
-         CONSTANT WMap : unsigned(9 DOWNTO 0) := to_unsigned(280, 10); -- LARGURA
-    CONSTANT HMap : unsigned(9 DOWNTO 0) := to_unsigned(155, 10); -- ALTURA
+    CONSTANT WMap : unsigned(9 DOWNTO 0) := to_unsigned(277, 10); -- LARGURA
+    CONSTANT HMap : unsigned(9 DOWNTO 0) := to_unsigned(153, 10); -- ALTURA
     
-    CONSTANT WPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
-    CONSTANT HPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    CONSTANT WPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(26, 10); -- LARGURA
+    CONSTANT HPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(26, 10); -- ALTURA
     
-    CONSTANT WPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
-    CONSTANT HPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    CONSTANT WPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(26, 10); -- LARGURA
+    CONSTANT HPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(26, 10); -- ALTURA
     
+    CONSTANT WFood  : unsigned(9 DOWNTO 0) := to_unsigned(11, 10); -- ALTURA
+    CONSTANT HFood  : unsigned(9 DOWNTO 0) := to_unsigned(7, 10); -- ALTURA
+
+    CONSTANT WGhost  : unsigned(9 DOWNTO 0) := to_unsigned(28, 10); -- LARGURA
+    CONSTANT HGhost  : unsigned(9 DOWNTO 0) := to_unsigned(28, 10); -- ALTURA
+
     CONSTANT X_INIT_MAP : unsigned(9 DOWNTO 0) := "0000101000";
     CONSTANT Y_INIT_MAP : unsigned(9 DOWNTO 0) := "0001010101";
-   
+
+    CONSTANT X_INIT_FOOD1 : unsigned(9 DOWNTO 0) := "0000111001";
+    CONSTANT Y_INIT_FOOD1 : unsigned(9 DOWNTO 0) := "0001100100";
+
+    CONSTANT X_INIT_FOOD2: unsigned(9 DOWNTO 0)  := "0010010101";
+    CONSTANT Y_INIT_FOOD2 : unsigned(9 DOWNTO 0) := "0001100100";
+
+    CONSTANT X_INIT_FOOD3 : unsigned(9 DOWNTO 0) := "0001101111";
+    CONSTANT Y_INIT_FOOD3 : unsigned(9 DOWNTO 0) := "0010011111";
+    
+    CONSTANT X_INIT_FOOD4 : unsigned(9 DOWNTO 0) := "0001101111";
+    CONSTANT Y_INIT_FOOD4 : unsigned(9 DOWNTO 0) := "1000101001";
+
+    CONSTANT X_INIT_FOOD5 : unsigned(9 DOWNTO 0) := "0010010101";
+    CONSTANT Y_INIT_FOOD5 : unsigned(9 DOWNTO 0) := "0101011011";
+
+    CONSTANT X_INIT_FOOD6 : unsigned(9 DOWNTO 0) := "0000111001";
+    CONSTANT Y_INIT_FOOD6 : unsigned(9 DOWNTO 0) := "0101011011";
+
+    CONSTANT X_INIT_FOOD7 : unsigned(9 DOWNTO 0) := "0010100100";
+    CONSTANT Y_INIT_FOOD7 : unsigned(9 DOWNTO 0) := "0011100100";
+    
+    CONSTANT X_INIT_FOOD8 : unsigned(9 DOWNTO 0) := "0011010001";
+    CONSTANT Y_INIT_FOOD8 : unsigned(9 DOWNTO 0) := "0001100101";
+
+    CONSTANT X_INIT_FOOD9 : unsigned(9 DOWNTO 0) := "0100110101";
+    CONSTANT Y_INIT_FOOD9 : unsigned(9 DOWNTO 0) := "0001100101";
+
+    CONSTANT X_INIT_FOOD10 : unsigned(9 DOWNTO 0) := "0100110101";
+    CONSTANT Y_INIT_FOOD10 : unsigned(9 DOWNTO 0) := "0001100101";
+
+    CONSTANT X_INIT_FOOD11 : unsigned(9 DOWNTO 0) := "0110011000";
+    CONSTANT Y_INIT_FOOD11 : unsigned(9 DOWNTO 0) := "0101011010";
+    
+    CONSTANT X_INIT_FOOD12 : unsigned(9 DOWNTO 0) := "0100110101";
+    CONSTANT Y_INIT_FOOD12 : unsigned(9 DOWNTO 0) := "0101011010";
+    
+    CONSTANT X_INIT_FOOD13 : unsigned(9 DOWNTO 0) := "0011010001";
+    CONSTANT Y_INIT_FOOD13 : unsigned(9 DOWNTO 0) := "0101011010";
+
+    CONSTANT X_INIT_FOOD14 : unsigned(9 DOWNTO 0) := "0100110101";
+    CONSTANT Y_INIT_FOOD14 : unsigned(9 DOWNTO 0) := "0100011101";
+
+    CONSTANT X_INIT_FOOD15 : unsigned(9 DOWNTO 0) := "0100110101";
+    CONSTANT Y_INIT_FOOD15 : unsigned(9 DOWNTO 0) := "0010100111";
+    
+    CONSTANT X_INIT_FOOD16 : unsigned(9 DOWNTO 0) := "1000101010";
+    CONSTANT Y_INIT_FOOD16 : unsigned(9 DOWNTO 0) := "0001100101";
+
+    CONSTANT X_INIT_FOOD17 : unsigned(9 DOWNTO 0) := "0111001110";
+    CONSTANT Y_INIT_FOOD17 : unsigned(9 DOWNTO 0) := "0001100101";
+
+    CONSTANT X_INIT_FOOD18 : unsigned(9 DOWNTO 0) := "1000101010";
+    CONSTANT Y_INIT_FOOD18 : unsigned(9 DOWNTO 0) := "0101011010";
+
+    CONSTANT X_INIT_FOOD19 : unsigned(9 DOWNTO 0) := "0111001110";
+    CONSTANT Y_INIT_FOOD19 : unsigned(9 DOWNTO 0) := "0101011010";
+    
+    CONSTANT X_INIT_FOOD20 : unsigned(9 DOWNTO 0) := "0111110111";
+    CONSTANT Y_INIT_FOOD20 : unsigned(9 DOWNTO 0) := "0010011111";
+
+    CONSTANT X_INIT_FOOD21 : unsigned(9 DOWNTO 0) := "0111110111";
+    CONSTANT Y_INIT_FOOD21 : unsigned(9 DOWNTO 0) := "0100101001";
+
 END packages;
 
 PACKAGE BODY packages IS

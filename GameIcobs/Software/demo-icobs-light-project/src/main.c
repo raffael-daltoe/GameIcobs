@@ -71,7 +71,7 @@ static __uint8_t isPositionOccupiedByGhost(Position ghosts[],
                                            __uint8_t numGhosts, __uint8_t x, __uint8_t y);
 static __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts,
                                  __uint8_t posX, __uint8_t posY);
-static void moveGhosts(char maze[10][20], Position ghosts[],
+static void moveGhosts(Position ghosts[],
                        __uint8_t numGhosts, __uint8_t posX, __uint8_t posY, __uint8_t difficulty);
 
 /*					GLOBAL VARIABLES					*/
@@ -157,74 +157,63 @@ static __uint8_t isPositionOccupiedByGhost(Position ghosts[],
     return 0; // Free Position
 }
 
-static void moveGhosts(char maze[10][20], Position ghosts[],
+static void moveGhosts(Position ghosts[],
                        __uint8_t numGhosts, __uint8_t posX, __uint8_t posY, __uint8_t difficulty)
 {
-    for (__uint8_t i = 0; i < numGhosts; i++)
-    {
-        __uint8_t movement;
+    for (__uint8_t i = 0; i < numGhosts; i++) {
         __uint8_t newPosX = ghosts[i].x;
         __uint8_t newPosY = ghosts[i].y;
 
-        if (difficulty == 1)
-        { // Easy : random movement
-            movement = rand() % 4;
-        }
-        else if (difficulty == 2)
-        { // Medium : occasionally movement in direction to PACMAN
-            if (rand() % 4)
-            { // 75% of chance of random movement, 25% of chance
-              // to follow PACMAN
-                movement = rand() % 4;
-            }
-            else
-            {
-                if (abs(ghosts[i].x - posX) > abs(ghosts[i].y - posY))
-                {
-                    movement = ghosts[i].x > posX ? 2 : 3; // left or right
-                }
-                else
-                {
-                    movement = ghosts[i].y > posY ? 0 : 1; // above or below
-                }
-            }
-        }
-        else
-        { // Hard : movement smartest in direction to PACMAN
-            if (rand() % 2)
-            {                                      // Alternance between axes X or Y
-                movement = newPosX > posX ? 2 : 3; // Left or Right
-            }
-            else
-            {
-                movement = newPosY > posY ? 0 : 1; //  above or below
-            }
+        // Pseudo-random direction based on ghost's current position and Pacman's position
+        __uint8_t pseudoRandomDirection = (ghosts[i].x + ghosts[i].y + posX + posY) % 4;
+
+        // Attempt to move ghost in pseudo-random direction
+        switch (pseudoRandomDirection) {
+            case 0: // Move up
+                newPosY = newPosY > 0 ? newPosY - 1 : newPosY;
+                break;
+            case 1: // Move down
+                newPosY++;
+                break;
+            case 2: // Move left
+                newPosX = newPosX > 0 ? newPosX - 1 : newPosX;
+                break;
+            case 3: // Move right
+                newPosX++;
+                break;
         }
 
-        switch (movement)
-        {
-        case 0:
-            newPosY--;
-            break;
-        case 1:
-            newPosY++;
-            break;
-        case 2:
-            newPosX--;
-            break;
-        case 3:
-            newPosX++;
-            break;
+        // Check for collisions with the map boundaries and obstacles
+        if (!check_collision(newPosX, newPosY)) {
+            // Update ghost position if no collision
+            ghosts[i].x = newPosX;
+            ghosts[i].y = newPosY;
+        } else {
+            // If there's a collision, try a different direction
+            newPosX = ghosts[i].x;
+            newPosY = ghosts[i].y;
+            pseudoRandomDirection = (pseudoRandomDirection + 1) % 4;
+            // Similar movement code as above, adapted for the new direction
+            // This is a simplified logic to handle collisions
         }
-
+    }
+        MY_VGA.X1_Position = ghosts[0].x;
+        MY_VGA.Y1_Position = ghosts[0].y;
+        MY_VGA.X2_Position = ghosts[1].x;
+        MY_VGA.Y2_Position = ghosts[1].y;
+        MY_VGA.X3_Position = ghosts[2].x;
+        MY_VGA.Y3_Position = ghosts[2].y;
+        MY_VGA.X4_Position = ghosts[3].x;
+        MY_VGA.Y4_Position = ghosts[3].y;
+        
         // Verify if is valid the position of the ghost
-        if (maze[newPosY][newPosX] != 'X' && !isPositionOccupiedByGhost(ghosts,
+        /*if (maze[newPosY][newPosX] != 'X' && !isPositionOccupiedByGhost(ghosts,
                                                                         numGhosts, newPosX, newPosY))
         {
             ghosts[i].x = newPosX;
             ghosts[i].y = newPosY;
-        }
-    }
+        }*/
+    
 }
 
 static __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts,
@@ -238,32 +227,6 @@ static __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts,
         }
     }
     return 0; // without collisions
-}
-
-bool binarySearch(int arr[], int size, int value)
-{
-    int low = 0;
-    int high = size - 1; // tamanho do vetor
-
-    while (low <= high)
-    {
-        int mid = low + (high - low) / 2;
-
-        if (arr[mid] == value)
-        {
-            return true; // found
-        }
-        else if (arr[mid] < value)
-        {
-            low = mid + 1;
-        }
-        else
-        {
-            high = mid - 1;
-        }
-    }
-
-    return false; // Not found
 }
 
 static void init_GPIO_and_UART()
@@ -309,20 +272,25 @@ static void init_GPIO_and_UART()
     set_timer_ms(1000, timer_clock_cb, 0);
 }
 
+/*Init positions ghosts
+X = [264]  |  Y = [212]
+X = [352]  |  Y = [217]
+X = [308]  |  Y = [262]
+X = [308]  |  Y = [216]*/
 static void init_Registers()
 {
-    MY_VGA.Y0_Position = 100;
+    MY_VGA.Y0_Position = 120;
     MY_VGA.X0_Position = 70;
-    MY_VGA.Y1_Position = 0;
-    MY_VGA.X1_Position = 0;
-    MY_VGA.Y2_Position = 0;
-    MY_VGA.X2_Position = 0;
-    MY_VGA.Y3_Position = 0;
-    MY_VGA.X3_Position = 0;
-    MY_VGA.Y4_Position = 0;
-    MY_VGA.X4_Position = 0;
-    MY_VGA.Y5_Position = 0;
-    MY_VGA.X5_Position = 0;
+    MY_VGA.Y1_Position = 200;       // blue
+    MY_VGA.X1_Position = 215;       // blue
+    MY_VGA.Y2_Position = 360;       // verde
+    MY_VGA.X2_Position = 550000;       // verde
+    MY_VGA.Y3_Position = 200;       // pink
+    MY_VGA.X3_Position = 210;       // pink
+    MY_VGA.Y4_Position = 500;        // something
+    MY_VGA.X4_Position = 320;       // some color kk
+    //MY_VGA.Y5_Position = 0;
+    //MY_VGA.X5_Position = 0;
     MY_VGA.Background = 0;
 }
 
@@ -362,11 +330,12 @@ Obstacle obstacles[] = {
     {505,236,547,298},
     {476,298,547,339},
     {505,153,547,211},
-    {476,113,547,153}
+    {476,113,547,153},
+    {0,357,640,480},
+    {0,0,640,95},
+    {0,0,50,480},
+    {567,0,640,480}
 
-
-    //X = [502]  |  Y = [153] e X = [547]  |  Y = [211]
-    // X = [477]  |  Y = [151] e X = [546]  |  Y = [113]
 };
 int obstacle_count = sizeof(obstacles) / sizeof(obstacles[0]);
 
@@ -388,12 +357,12 @@ int check_collision(int x, int y)
 ////////////////////////////////////////////////////////////////////////////////
 //  -----------------                                                         //
 //  |  X0,Y0        |       PACMAN - MOVEMENT                                 //
-//  |  X1,Y1        |       PACMAN - CONTROL THE TYPE OF PACMAN               //
-//  |  X2,Y2        |       GHOST0                                            //
-//  |  X3,Y3        |       GHOST1                                            //
-//  |  X4,Y4        |       GHOST2                                            //
-//  |  X5,Y5        |       GHOST3                                            //
-//  |  BACKGROUND   |       ANYTHING                                          //
+//  |  X1,Y1        |       GHOST0                                            //
+//  |  X2,Y2        |       GHOST1                                            //
+//  |  X3,Y3        |       GHOST2                                            //
+//  |  X4,Y4        |       GHOST3                                            //
+//  |  Scoreboard   |       Score on 7SEG                                     //
+//  |  BACKGROUND   |       SW                                                //
 //  -----------------                                                         //
 ////////////////////////////////////////////////////////////////////////////////
 int main(void)
@@ -401,90 +370,68 @@ int main(void)
     init_GPIO_and_UART();
     init_Registers();
 
+    Position ghosts[4];
+    ghosts[0].x = MY_VGA.X1_Position;
+    ghosts[0].y = MY_VGA.Y1_Position;
+    ghosts[1].x = MY_VGA.X2_Position;
+    ghosts[1].y = MY_VGA.Y2_Position;
+    ghosts[2].x = MY_VGA.X3_Position;
+    ghosts[2].y = MY_VGA.Y3_Position;
+    ghosts[3].x = MY_VGA.X4_Position;
+    ghosts[3].y = MY_VGA.Y4_Position;
+
     while (1)
     {
 
+        moveGhosts(ghosts,4,MY_VGA.X0_Position,MY_VGA.Y0_Position,1);
         // Movimento para a direita
-        if (BTNR && MY_VGA.X0_Position + 1 > 50 && MY_VGA.X0_Position + 1 < 565 &&
+        /*if (BTNR && MY_VGA.X0_Position + 1 > 50 && MY_VGA.X0_Position + 1 < 565 &&
             MY_VGA.Y0_Position <= 358 && MY_VGA.Y0_Position > 94)
-        {
+        {*/if(BTNR){
             if (!check_collision(MY_VGA.X0_Position + 1, MY_VGA.Y0_Position))
             {
                 MY_VGA.X0_Position++;
                 myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
             }
         }
+        //}
 
         // Movimento para a esquerda
-        if (BTNL && MY_VGA.X0_Position - 1 > 50 && MY_VGA.X0_Position - 1 <= 566 &&
+        /*if (BTNL && MY_VGA.X0_Position - 1 > 50 && MY_VGA.X0_Position - 1 <= 566 &&
             MY_VGA.Y0_Position <= 358 && MY_VGA.Y0_Position > 94)
-        {
+        {*/if(BTNL){
             if (!check_collision(MY_VGA.X0_Position - 1, MY_VGA.Y0_Position))
             {
                 MY_VGA.X0_Position--;
                 myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
             }
         }
+        //}
 
         // Movimento para baixo
-        if (BTND && MY_VGA.X0_Position > 50 && MY_VGA.X0_Position <= 566 &&
+        /*if (BTND && MY_VGA.X0_Position > 50 && MY_VGA.X0_Position <= 566 &&
             MY_VGA.Y0_Position + 1 < 357)
-        {
+        {*/
+        if(BTND){
             if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position + 1))
             {
                 MY_VGA.Y0_Position++;
                 myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
-            }
-        }
+            }}
+       // }
 
         // Movimento para cima
-        if (BTNU && MY_VGA.X0_Position > 50 && MY_VGA.X0_Position <= 566 &&
+        /*if (BTNU && MY_VGA.X0_Position > 50 && MY_VGA.X0_Position <= 566 &&
             MY_VGA.Y0_Position - 1 > 94)
-        {
+        {*/if(BTNU){
             if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position - 1))
             {
                 MY_VGA.Y0_Position--;
                 myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
             }
         }
+        //}
         delay_ms(0.5);
-
-        // Mover para a direita, garantindo que não ultrapasse a borda esquerda da segunda imagem
-        /*if(BTNR && MY_VGA.X1_Position < 558) {
-            if(!(MY_VGA.X1_Position + 80 >= MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90 &&
-            ((MY_VGA.Y1_Position + 90 > MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90) ||
-            (MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 90 > MY_VGA.Y2_Position)))) {
-                MY_VGA.X1_Position++;
-            }
-        }
-
-
-        // Mover para a esquerda, garantindo que não ultrapasse a borda direita da segunda imagem
-        if(BTNL && MY_VGA.X1_Position > 0) {
-            if(!(MY_VGA.X1_Position <= MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 80 > MY_VGA.X2_Position &&
-            ((MY_VGA.Y1_Position + 90 > MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90) ||
-            (MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 90 > MY_VGA.Y2_Position)))) {
-                MY_VGA.X1_Position--;
-            }
-        }
-
-        // Mover para cima, garantindo que não ultrapasse a borda inferior da segunda imagem
-        if(BTNU && MY_VGA.Y1_Position > 0) {
-            if(!(MY_VGA.Y1_Position <= MY_VGA.Y2_Position + 90 && MY_VGA.Y1_Position + 90 > MY_VGA.Y2_Position &&
-            ((MY_VGA.X1_Position + 80 > MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90) ||
-            (MY_VGA.X1_Position < MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 80 > MY_VGA.X2_Position)))) {
-                MY_VGA.Y1_Position--;
-            }
-        }
-
-        // Mover para baixo, garantindo que não ultrapasse a borda superior da segunda imagem
-        if(BTND && MY_VGA.Y1_Position < 390) {
-            if(!(MY_VGA.Y1_Position + 90 >= MY_VGA.Y2_Position && MY_VGA.Y1_Position < MY_VGA.Y2_Position + 90 &&
-            ((MY_VGA.X1_Position + 80 > MY_VGA.X2_Position && MY_VGA.X1_Position < MY_VGA.X2_Position + 90) ||
-            (MY_VGA.X1_Position < MY_VGA.X2_Position + 90 && MY_VGA.X1_Position + 80 > MY_VGA.X2_Position)))) {
-                MY_VGA.Y1_Position++;
-            }
-        }*/
 
         if (SW0)
             MY_VGA.Background |= (1 << 0);

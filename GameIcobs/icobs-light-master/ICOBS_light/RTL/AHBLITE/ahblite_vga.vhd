@@ -24,7 +24,11 @@ port (
     vgaGreen_ahblite : OUT std_logic_vector(3 downto 0);
     vgaBLue_ahblite  : OUT std_logic_vector(3 downto 0);
     Hsync_ahblite    : OUT std_logic;
-    Vsync_ahblite    : OUT std_logic; 
+    Vsync_ahblite    : OUT std_logic;
+
+	seg			: OUT std_logic_vector(0 to 6);
+	an			: OUT std_logic_vector(3 downto 0);
+	dp 			: OUT std_logic; 
 
 	-- AHB-Lite interface
 	AHBLITE_IN  : in  AHBLite_master_vector;
@@ -55,7 +59,8 @@ architecture arch of ahblite_vga is
 	signal RST 	   : std_logic;
 
     signal Background : std_logic_vector(31 downto 0);
-    
+    signal Scoreboard : std_logic_vector(31 downto 0);
+
 	signal X0_Position, Y0_Position : std_logic_vector(31 downto 0);
 	
 	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
@@ -64,7 +69,7 @@ architecture arch of ahblite_vga is
 	signal X3_Position, Y3_Position : std_logic_vector(31 downto 0);
 	signal X4_Position, Y4_Position : std_logic_vector(31 downto 0);
 
-	signal X5_Position, Y5_Position : std_logic_vector(31 downto 0);
+	--signal X5_Position, Y5_Position : std_logic_vector(31 downto 0);
 ----------------------------------------------------------------
 begin
 
@@ -86,13 +91,31 @@ begin
 			C3				   => X3_Position(9 downto 0),	
 			R4				   => Y4_Position(9 downto 0),
 			C4				   => X4_Position(9 downto 0),
-			R5				   => Y5_Position(9 downto 0),
-			C5				   => X5_Position(9 downto 0),
+			--R5				   => Y5_Position(9 downto 0),
+			--C5				   => X5_Position(9 downto 0),
                 
             vgaRed		   	   => vgaRed_ahblite,
             vgaGreen   		   => vgaGreen_ahblite,
-            vgaBlue   		   => vgaBLue_ahblite
+            vgaBlue   		   => vgaBLue_ahblite,
+
+			Scoreboard   	   => Scoreboard
+
+			--seg  			   => seg,
+			--an   			   => an,
+			--dp   			   => dp
         );
+
+	U_SEG_CTRL: entity work.seg_top port map(
+		mclk => HCLK,
+		rst  => RST,
+		E1   => Scoreboard(3 downto 0),
+		E2   => Scoreboard(7 downto 4),
+		E3   => Scoreboard(11 downto 8),
+		E4   => Scoreboard(15 downto 12),
+		seg  => seg,
+		an   => an,
+		dp   => dp
+	);
 
 	RST <= not HRESETn;
 
@@ -128,8 +151,9 @@ begin
 			X3_Position <= (others => '0');
 			Y4_Position <= (others => '0');
 			X4_Position <= (others => '0');
-			Y5_Position <= (others => '0');
-			X5_Position <= (others => '0');
+			--Scoreboard <=  (others => '0');
+			--Y5_Position <= (others => '0');
+			--X5_Position <= (others => '0');
 			
 		--------------------------------
 		elsif rising_edge(HCLK) then
@@ -151,8 +175,9 @@ begin
 					when x"08" => Y3_Position <= SlaveIn.HWDATA;
 					when x"09" => X4_Position <= SlaveIn.HWDATA;
 					when x"0A" => Y4_Position <= SlaveIn.HWDATA;
-					when x"0B" => X5_Position <= SlaveIn.HWDATA;
-					when x"0C" => Y5_Position <= SlaveIn.HWDATA;
+					--when x"0B" => Scoreboard  <= SlaveIn.HWDATA;
+					--when x"0B" => X5_Position <= SlaveIn.HWDATA;
+					--when x"0C" => Y5_Position <= SlaveIn.HWDATA;
 					
 					when others =>
 				end case;
@@ -175,8 +200,9 @@ begin
 						when x"08" => SlaveOut.HRDATA <= Y3_Position;
 						when x"09" => SlaveOut.HRDATA <= X4_Position;
 						when x"0A" => SlaveOut.HRDATA <= Y4_Position;
-						when x"0B" => SlaveOut.HRDATA <= X5_Position;
-						when x"0C" => SlaveOut.HRDATA <= Y5_Position;
+						--when x"0B" => SlaveOut.HRDATA <= Scoreboard;
+						--when x"0B" => SlaveOut.HRDATA <= X5_Position;
+						--when x"0C" => SlaveOut.HRDATA <= Y5_Position;
 						when others =>
 					end case;
 				end if;

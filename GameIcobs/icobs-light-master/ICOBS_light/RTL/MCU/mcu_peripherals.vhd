@@ -200,22 +200,22 @@ architecture arch of mcu_peripherals is
 		TXD_TRIS    : out std_logic);
 	end component;
 
-	component ahblite_my_periph
-	port (
-		HRESETn     : in  std_logic;
-		HCLK        : in  std_logic;
+	-- component ahblite_my_periph
+	-- port (
+	-- 	HRESETn     : in  std_logic;
+	-- 	HCLK        : in  std_logic;
 
-		HSEL        : in  std_logic;
-		HREADY      : in  std_logic;
+	-- 	HSEL        : in  std_logic;
+	-- 	HREADY      : in  std_logic;
 
-		seg			: OUT std_logic_vector(0 to 6);
-		an			: OUT std_logic_vector(3 downto 0);
-		dp 			: OUT std_logic;
+	-- 	seg			: OUT std_logic_vector(0 to 6);
+	-- 	an			: OUT std_logic_vector(3 downto 0);
+	-- 	dp 			: OUT std_logic;
 
-		-- AHB-Lite interface
-		AHBLITE_IN  : in  AHBLite_master_vector;
-		AHBLITE_OUT : out AHBLite_slave_vector);
-	end component;
+	-- 	-- AHB-Lite interface
+	-- 	AHBLITE_IN  : in  AHBLite_master_vector;
+	-- 	AHBLITE_OUT : out AHBLite_slave_vector);
+	-- end component;
 
 	component ahblite_vga
 	port (
@@ -231,6 +231,11 @@ architecture arch of mcu_peripherals is
 		vgaBLue_ahblite  : OUT std_logic_vector(3 downto 0);
 		Hsync_ahblite    : OUT std_logic;
 		Vsync_ahblite    : OUT std_logic; 
+
+		-- Outputs to 7SEG
+		seg						: OUT std_logic_vector(0 to 6);
+		an						: OUT std_logic_vector(3 downto 0);
+		dp 						: OUT std_logic;
 
 		-- AHB-Lite interface
 		AHBLITE_IN  : in  AHBLite_master_vector;
@@ -285,19 +290,19 @@ architecture arch of mcu_peripherals is
 
 begin
 
-	-- Port map to ahblite_my_periph
-	U_MY_PERIPH: ahblite_my_periph 
-	port map ( 
-		HRESETn 	=> HRESETn,
-		HCLK    	=> HCLK,
-		HSEL    	=> HSEL(CID_ENUM'pos(CID_MY_PERIPH)),
-		HREADY  	=> MasterIn.HREADYOUT,
-		AHBLITE_IN 	=> BusMasterOut,
-		AHBLITE_OUT => BusSlaveArray(CID_ENUM'pos(CID_MY_PERIPH)),
-		seg  		=> seg,
-		an			=> an,
-		dp			=> dp
-	);
+	-- -- Port map to ahblite_my_periph
+	-- U_MY_PERIPH: ahblite_my_periph 
+	-- port map ( 
+	-- 	HRESETn 	=> HRESETn,
+	-- 	HCLK    	=> HCLK,
+	-- 	HSEL    	=> HSEL(CID_ENUM'pos(CID_MY_PERIPH)),
+	-- 	HREADY  	=> MasterIn.HREADYOUT,
+	-- 	AHBLITE_IN 	=> BusMasterOut,
+	-- 	AHBLITE_OUT => BusSlaveArray(CID_ENUM'pos(CID_MY_PERIPH)),
+	-- 	seg  		=> seg,
+	-- 	an			=> an,
+	-- 	dp			=> dp
+	-- );
 
 	VGA_PERIPH: ahblite_vga
 	port map(
@@ -307,10 +312,6 @@ begin
 		HSEL             => HSEL(CID_ENUM'pos(CID_MY_VGA)),
 		HREADY           => MasterIn.HREADYOUT,
 
-		--btnu 			=>	IOPC(0),				-- IOPC[0] = BTNU
-		--btnl 			=>	IOPC(1),				-- IOPC[1] = BTNL
-		--btnr 			=>	IOPC(2),				-- IOPC[2] = BTNR
-		--btnd 			=>	IOPC(3),				-- IOPC[3] = BTND
 
 
 		--sw				 => IOPA_READ(15 DOWNTO 0),
@@ -320,6 +321,10 @@ begin
 		vgaBLue_ahblite  => vgaBLue_mcu,
 		Hsync_ahblite    => Hsync_mcu,
 		Vsync_ahblite    => Vsync_mcu,
+
+		seg				=> seg,	
+		an				=> an,		
+		dp 				=> dp,
 
 		-- AHB-Lite interface
 		AHBLITE_IN  => BusMasterOut,

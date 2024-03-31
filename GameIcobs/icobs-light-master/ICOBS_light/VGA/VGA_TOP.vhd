@@ -11,23 +11,27 @@ ENTITY VGA_TOP IS
               Hsync       : OUT STD_LOGIC;
               Vsync       : OUT STD_LOGIC;
               
-              R0          : STD_LOGIC_VECTOR(9 downto 0);
-              C0          : STD_LOGIC_VECTOR(9 downto 0);
-              R1          : STD_LOGIC_VECTOR(9 downto 0);
-              C1          : STD_LOGIC_VECTOR(9 downto 0);
-              R2          : STD_LOGIC_VECTOR(9 downto 0);
-              C2          : STD_LOGIC_VECTOR(9 downto 0);
-              R3          : STD_LOGIC_VECTOR(9 downto 0);
-              C3          : STD_LOGIC_VECTOR(9 downto 0);
-              R4          : STD_LOGIC_VECTOR(9 downto 0);
-              C4          : STD_LOGIC_VECTOR(9 downto 0);
-              R5          : STD_LOGIC_VECTOR(9 downto 0);
-              C5          : STD_LOGIC_VECTOR(9 downto 0);
+              R0          : IN STD_LOGIC_VECTOR(9 downto 0);
+              C0          : IN STD_LOGIC_VECTOR(9 downto 0);
+              R1          : IN STD_LOGIC_VECTOR(9 downto 0);
+              C1          : IN STD_LOGIC_VECTOR(9 downto 0);
+              R2          : IN STD_LOGIC_VECTOR(9 downto 0);
+              C2          : IN STD_LOGIC_VECTOR(9 downto 0);
+              R3          : IN STD_LOGIC_VECTOR(9 downto 0);
+              C3          : IN STD_LOGIC_VECTOR(9 downto 0);
+              R4          : IN STD_LOGIC_VECTOR(9 downto 0);
+              C4          : IN STD_LOGIC_VECTOR(9 downto 0);
+              Scoreboard  : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
               sw          : IN STD_LOGIC_VECTOR (11 DOWNTO 0);
               vgaRed      : OUT vector4;
               vgaGreen    : OUT vector4;
-              vgaBlue     : OUT vector4
+              vgaBlue     : OUT vector4;
+
+              seg	     : OUT std_logic_vector(0 to 6);
+              an	     : OUT std_logic_vector(3 downto 0);
+              dp 	     : OUT std_logic
+
        );
 END VGA_TOP;
 
@@ -47,8 +51,8 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        SIGNAL C3_s                   : unsigned(9 downto 0);
        SIGNAL R4_s                   : unsigned(9 downto 0);
        SIGNAL C4_s                   : unsigned(9 downto 0);
-       SIGNAL R5_s                   : unsigned(9 downto 0);
-       SIGNAL C5_s                   : unsigned(9 downto 0);     
+      -- SIGNAL R5_s                   : unsigned(9 downto 0);
+      -- SIGNAL C5_s                   : unsigned(9 downto 0);     
        
        -- SIGNALS OF Memory OUTPUT PROM
        SIGNAL M_map_s                      : vector12;   -- 12 bits
@@ -130,22 +134,25 @@ BEGIN
               hc            =>      hc,     
               vc            =>      vc, 
               changePacman  =>      changePacman_s,
+              rst           =>      rst,
+              clk           =>      clk25,
               -- CONNECTION WITH THE REGISTERS  
               R_SW0         =>      R0_s,      
               C_SW0         =>      C0_s,
 
-              --R_SW1         =>      R1_s,
-              --C_SW1         =>      C1_s,
+              R_SW1         =>      R1_s,
+              C_SW1         =>      C1_s,
 
---              R_SW2         =>      R2_s,
---              C_SW2         =>      C2_s,
+              R_SW2         =>      R2_s,
+              C_SW2         =>      C2_s,
 
---              R_SW3         =>      R3_s,
---              C_SW3         =>      C3_s,
+              R_SW3         =>      R3_s,
+              C_SW3         =>      C3_s,
 
---              R_SW4         =>      R4_s,
---              C_SW4         =>      C4_s,
+              R_SW4         =>      R4_s,
+              C_SW4         =>      C4_s,
 
+              Eats          =>      Scoreboard,
 --              R_SW5         =>      R5_s,
 --              C_SW5         =>      C5_s,
 
@@ -189,7 +196,7 @@ BEGIN
     C3_s <= to_unsigned(to_integer(unsigned(C3)), C3'length); 
     R4_s <= to_unsigned(to_integer(unsigned(R4)), R4'length); 
     C4_s <= to_unsigned(to_integer(unsigned(C4)), C4'length); 
-    R5_s <= to_unsigned(to_integer(unsigned(R5)), R5'length); 
-    C5_s <= to_unsigned(to_integer(unsigned(C5)), C5'length); 
+    --R5_s <= to_unsigned(to_integer(unsigned(R5)), R5'length); 
+    --C5_s <= to_unsigned(to_integer(unsigned(C5)), C5'length); 
     
 END Behavioral;
