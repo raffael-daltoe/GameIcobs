@@ -4,7 +4,7 @@ Discarded input sections
  .text          0x0000000000000000        0x8 build/crt0.S.o
  .data          0x0000000000000000        0x0 build/crt0.S.o
  .bss           0x0000000000000000        0x0 build/crt0.S.o
- .data          0x0000000000000000        0x0 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ .data          0x0000000000000000        0x0 /tmp/cc3O6JvB.ltrans0.ltrans.o
 
 Memory Configuration
 
@@ -17,7 +17,7 @@ Linker script and memory map
 
 LOAD build/crt0.S.o
 LOAD build/lib/misc/print.c.o
-LOAD /tmp/cc5vbcGG.ltrans0.ltrans.o
+LOAD /tmp/cc3O6JvB.ltrans0.ltrans.o
 LOAD build/lib/libarch/uart.c.o
 LOAD build/lib/libarch/timer.c.o
 LOAD build/src/main.c.o
@@ -35,36 +35,36 @@ END GROUP
                 0x0000000000002000                __STACK_SIZE = 0x2000
                 0x0000000000002000                __HEAP_SIZE = 0x2000
 
-.text           0x0000000010000000      0xdea
+.text           0x0000000010000000     0x15de
  *(.vectors)
  .vectors       0x0000000010000000       0x8c build/crt0.S.o
  *(.text)
- .text          0x000000001000008c      0x64a /tmp/cc5vbcGG.ltrans0.ltrans.o
-                0x0000000010000564                IRQ_04_Handler
-                0x0000000010000656                IRQ_00_Handler
-                0x00000000100006c8                Default_Handler
+ .text          0x000000001000008c      0xb20 /tmp/cc3O6JvB.ltrans0.ltrans.o
+                0x0000000010000a3a                IRQ_04_Handler
+                0x0000000010000b2c                IRQ_00_Handler
+                0x0000000010000b9e                Default_Handler
  *(.text.*)
  .text.Reset_Handler
-                0x00000000100006d6       0x62 build/crt0.S.o
-                0x00000000100006d6                Reset_Handler
+                0x0000000010000bac       0x62 build/crt0.S.o
+                0x0000000010000bac                Reset_Handler
  .text.Default_Handler
-                0x0000000010000738        0x2 build/crt0.S.o
-                0x0000000010000738                IRQ_08_Handler
-                0x0000000010000738                IRQ_06_Handler
-                0x0000000010000738                IRQ_11_Handler
-                0x0000000010000738                IRQ_10_Handler
-                0x0000000010000738                IRQ_07_Handler
-                0x0000000010000738                IRQ_01_Handler
-                0x0000000010000738                IRQ_13_Handler
-                0x0000000010000738                IRQ_14_Handler
-                0x0000000010000738                IRQ_02_Handler
-                0x0000000010000738                IRQ_05_Handler
-                0x0000000010000738                IRQ_NMI_Handler
-                0x0000000010000738                IRQ_09_Handler
-                0x0000000010000738                IRQ_03_Handler
-                0x0000000010000738                IRQ_12_Handler
- .text.startup  0x000000001000073a      0x616 /tmp/cc5vbcGG.ltrans0.ltrans.o
-                0x000000001000073a                main
+                0x0000000010000c0e        0x2 build/crt0.S.o
+                0x0000000010000c0e                IRQ_08_Handler
+                0x0000000010000c0e                IRQ_06_Handler
+                0x0000000010000c0e                IRQ_11_Handler
+                0x0000000010000c0e                IRQ_10_Handler
+                0x0000000010000c0e                IRQ_07_Handler
+                0x0000000010000c0e                IRQ_01_Handler
+                0x0000000010000c0e                IRQ_13_Handler
+                0x0000000010000c0e                IRQ_14_Handler
+                0x0000000010000c0e                IRQ_02_Handler
+                0x0000000010000c0e                IRQ_05_Handler
+                0x0000000010000c0e                IRQ_NMI_Handler
+                0x0000000010000c0e                IRQ_09_Handler
+                0x0000000010000c0e                IRQ_03_Handler
+                0x0000000010000c0e                IRQ_12_Handler
+ .text.startup  0x0000000010000c10      0x718 /tmp/cc3O6JvB.ltrans0.ltrans.o
+                0x0000000010000c10                main
  *(.init)
  *(.fini)
  *crtbegin.o(.ctors)
@@ -80,22 +80,22 @@ END GROUP
  *(.lit)
  *(.shdata)
  *(.rodata)
- *fill*         0x0000000010000d50        0x0 
- .rodata        0x0000000010000d50       0x84 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ *fill*         0x0000000010001328        0x0 
+ .rodata        0x0000000010001328      0x288 /tmp/cc3O6JvB.ltrans0.ltrans.o
  *(.rodata.*)
  .rodata.str1.4
-                0x0000000010000dd4       0x16 /tmp/cc5vbcGG.ltrans0.ltrans.o
+                0x00000000100015b0       0x2e /tmp/cc3O6JvB.ltrans0.ltrans.o
  *(.eh_frame*)
  *(.shbss)
 
-.rela.dyn       0x0000000010000dec        0x0
+.rela.dyn       0x00000000100015e0        0x0
  .rela.text.Reset_Handler
-                0x0000000010000dec        0x0 build/crt0.S.o
- .rela.vectors  0x0000000010000dec        0x0 build/crt0.S.o
-                0x0000000010000dec                . = ALIGN (0x4)
-                0x0000000010000dec                _text_end = .
+                0x00000000100015e0        0x0 build/crt0.S.o
+ .rela.vectors  0x00000000100015e0        0x0 build/crt0.S.o
+                0x00000000100015e0                . = ALIGN (0x4)
+                0x00000000100015e0                _text_end = .
 
-.data           0x0000000010010000        0x0 load address 0x0000000010000dec
+.data           0x0000000010010000        0x0 load address 0x00000000100015e0
                 0x0000000010010000                _data_start = .
  *(vtable)
  *(.data)
@@ -124,10 +124,10 @@ END GROUP
                 0x0000000010010000                . = ALIGN (0x4)
                 0x0000000010010000                _bss_start = .
  *(.bss)
- .bss           0x0000000010010000       0xa0 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ .bss           0x0000000010010000       0xa0 /tmp/cc3O6JvB.ltrans0.ltrans.o
  *(.bss.*)
  *(.sbss)
- .sbss          0x00000000100100a0       0x20 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ .sbss          0x00000000100100a0       0x20 /tmp/cc3O6JvB.ltrans0.ltrans.o
  *(.sbss.*)
  *(COMMON)
                 0x00000000100100c0                . = ALIGN (0x4)
@@ -158,8 +158,8 @@ OUTPUT(output/demo-icobs-light.elf elf32-littleriscv)
  .riscv.attributes
                 0x0000000000000000       0x24 build/crt0.S.o
  .riscv.attributes
-                0x0000000000000024       0x2a /tmp/cc5vbcGG.ltrans0.ltrans.o
+                0x0000000000000024       0x2a /tmp/cc3O6JvB.ltrans0.ltrans.o
 
 .comment        0x0000000000000000       0x12
- .comment       0x0000000000000000       0x12 /tmp/cc5vbcGG.ltrans0.ltrans.o
+ .comment       0x0000000000000000       0x12 /tmp/cc3O6JvB.ltrans0.ltrans.o
                                          0x13 (size before relaxing)

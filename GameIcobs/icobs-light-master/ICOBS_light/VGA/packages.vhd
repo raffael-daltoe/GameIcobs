@@ -8,6 +8,7 @@ PACKAGE packages IS
     constant N : INTEGER := 10;
     subtype vector10 is std_logic_vector(9 downto 0);
     subtype vector4 is std_logic_vector(3 downto 0);
+    subtype vector7 is std_logic_vector(6 downto 0);
     subtype vector11 is std_logic_vector(10 downto 0);
     subtype vector12 is std_logic_vector(11 downto 0);
     subtype vector16 is std_logic_vector(15 downto 0);
@@ -65,6 +66,19 @@ PACKAGE packages IS
      constant vlines:    unsigned(N-1 downto 0) := to_unsigned(VGA_HEIGHT + VERTICAL_PULSE + VERTICAL_BP+VERTICAL_FP , N); -- 681
      constant vbp:       unsigned(N-1 downto 0) := to_unsigned(VERTICAL_PULSE + VERTICAL_BP, N ); -- 31
      constant vfp:       unsigned(N-1 downto 0) := to_unsigned(VGA_HEIGHT + VERTICAL_PULSE + VERTICAL_BP, N); -- 530
+     
+         CONSTANT WMap : unsigned(9 DOWNTO 0) := to_unsigned(280, 10); -- LARGURA
+    CONSTANT HMap : unsigned(9 DOWNTO 0) := to_unsigned(155, 10); -- ALTURA
+    
+    CONSTANT WPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    CONSTANT HPacmanOpen : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    
+    CONSTANT WPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    CONSTANT HPacmanClose : unsigned(9 DOWNTO 0) := to_unsigned(29, 10); -- ALTURA
+    
+    CONSTANT X_INIT_MAP : unsigned(9 DOWNTO 0) := "0000101000";
+    CONSTANT Y_INIT_MAP : unsigned(9 DOWNTO 0) := "0001010101";
+   
 END packages;
 
 PACKAGE BODY packages IS

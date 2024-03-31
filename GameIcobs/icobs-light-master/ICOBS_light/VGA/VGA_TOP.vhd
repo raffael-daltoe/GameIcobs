@@ -33,14 +33,14 @@ END VGA_TOP;
 
 ARCHITECTURE Behavioral OF VGA_TOP IS
 
-       SIGNAL rst, clk100,clk25, vidon : STD_LOGIC;
+       SIGNAL rst, clk100,clk25, vidon,changePacman_s : STD_LOGIC;
        SIGNAL hc, vc : vector10;
 
        -- SIGNALS OF REGISTERS
-       SIGNAL R0_s                   : unsigned(9 downto 0);
-       SIGNAL C0_s                   : unsigned(9 downto 0);
-       SIGNAL R1_s                   : unsigned(9 downto 0);
-       SIGNAL C1_s                   : unsigned(9 downto 0);
+       SIGNAL R0_s                   : unsigned(9 downto 0);            -- movement of pacman
+       SIGNAL C0_s                   : unsigned(9 downto 0);            -- movement of pacman
+       SIGNAL R1_s                   : unsigned(9 downto 0);            -- control of type of pacman
+       SIGNAL C1_s                   : unsigned(9 downto 0);            -- nothing  
        SIGNAL R2_s                   : unsigned(9 downto 0);
        SIGNAL C2_s                   : unsigned(9 downto 0);
        SIGNAL R3_s                   : unsigned(9 downto 0);
@@ -51,15 +51,18 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        SIGNAL C5_s                   : unsigned(9 downto 0);     
        
        -- SIGNALS OF Memory OUTPUT PROM
-       SIGNAL M_map_s                : vector12;   
-       SIGNAL M_pacman_s             : vector12;
-       --SIGNAL M_ghost1_s             : vector12;
-
+       SIGNAL M_map_s                      : vector12;   -- 12 bits
+       SIGNAL M_pacmanOpened_s             : vector12;   -- 12 bits
+       SIGNAL M_pacmanClosed_s             : vector12;   -- 12 bits
+       SIGNAL M_Ghost_s                    : vector12;   -- 12 bits
+       SIGNAL M_food_s                     : vector12;   -- 12 bits
+       
        -- SIGNALS OF Memory INPUT PROM             
-       --SIGNAL addr_ghost1_s          : vector11;
-       SIGNAL addr_pacman_s          : vector11;
-       SIGNAL addr_map_s             : vector16;              
-
+       SIGNAL addr_pacmanOpened_s          : vector10;  -- 11 bits
+       SIGNAL addr_pacmanClosed_s          : vector10;  -- 11 bits
+       SIGNAL addr_Ghost                   : vector10;  -- 10 bits     
+       SIGNAL addr_map_s                   : vector16;  -- 16 bits           
+       SIGNAL addr_food_s                  : vector7;   -- 7 bits
 
 BEGIN
     
@@ -70,15 +73,25 @@ BEGIN
               addra         =>     addr_map_s, 
               douta         =>     M_map_s);
 
---     U_GHOST1: ENTITY work.prom_ghost1_blue 
---     port map(clka           =>     clk25, 
---               addra         =>     addr_ghost1_s, 
---               douta         =>     M_ghost1_s);
+     U_GHOST1: ENTITY work.prom_ghost
+     port map(clka          =>     clk25, 
+              addra         =>     addr_Ghost, 
+              douta         =>     M_Ghost_s);
 
-    U_PACMAN: ENTITY work.prom_pacman 
+    U_PACMANClosed: ENTITY work.prom_pacmanClosed
     port map (clka          =>     clk25, 
-              addra         =>     addr_pacman_s, 
-              douta         =>     M_pacman_s);
+              addra         =>     addr_pacmanClosed_s, 
+              douta         =>     M_pacmanClosed_s);
+
+    U_PACMANOpened: ENTITY work.prom_pacmanOpened
+    port map (clka          =>     clk25, 
+              addra         =>     addr_pacmanOpened_s, 
+              douta         =>     M_pacmanOpened_s);
+              
+    U_Food: ENTITY work.prom_addr_food_s
+    port map (clka          =>     clk25, 
+              addra         =>     addr_food_s, 
+              douta         =>     M_food_s);
 
 
     -- PORT MAPS OF CLOCK, AND VSYNC/HSYNC
@@ -86,6 +99,13 @@ BEGIN
     PORT MAP (mclk          =>     clk, 
               reset         =>     rst,
               clk25         =>     clk25);
+    
+    U6: ENTITY work.Pacman_Clock
+    PORT MAP(clk_50mhz      => clk,
+           rst              => rst,
+           clk_1hz          => changePacman_s            
+    );
+
 
     U2 : ENTITY work.VGA_640_x_480 
     PORT MAP (rst           =>     rst, 
@@ -103,49 +123,49 @@ BEGIN
              rst            =>      rst, 
              clk_out        =>      clk100);
 
---    U6: ENTITY work.Map_Replicator
---    port map(
---       clka                 =>      clk25,
---       addra                =>      addr_map_s,
---       douta                =>      M_map_s
---    );
 
     -- CONNECTION WITH THE ROM AND SENDING TO OUTPUT OF THIS MODULE
     U3 : ENTITY work.VGA_Basic_ROM 
     PORT MAP (vidon         =>      vidon, 
               hc            =>      hc,     
               vc            =>      vc, 
-              
-              -- CONNECTION WITH THE REGISTERS 
+              changePacman  =>      changePacman_s,
+              -- CONNECTION WITH THE REGISTERS  
               R_SW0         =>      R0_s,      
               C_SW0         =>      C0_s,
 
-              R_SW1         =>      R1_s,
-              C_SW1         =>      C1_s,
+              --R_SW1         =>      R1_s,
+              --C_SW1         =>      C1_s,
 
-              R_SW2         =>      R2_s,
-              C_SW2         =>      C2_s,
+--              R_SW2         =>      R2_s,
+--              C_SW2         =>      C2_s,
 
-              R_SW3         =>      R3_s,
-              C_SW3         =>      C3_s,
+--              R_SW3         =>      R3_s,
+--              C_SW3         =>      C3_s,
 
-              R_SW4         =>      R4_s,
-              C_SW4         =>      C4_s,
+--              R_SW4         =>      R4_s,
+--              C_SW4         =>      C4_s,
 
-              R_SW5         =>      R5_s,
-              C_SW5         =>      C5_s,
+--              R_SW5         =>      R5_s,
+--              C_SW5         =>      C5_s,
 
 
               -- CONNECTION WITH Memory OUTPUT PROM
-              M_map_ROM         =>      M_map_s,
-              M_pacman_ROM      =>      M_pacman_s,
-              --M_ghost1_ROM      =>      M_ghost1_s,
-
+              romMap               =>      M_map_s,
+              romPacmanClosed      =>      M_pacmanClosed_s,
+              romPacmanOpened      =>      M_pacmanOpened_s,
+              romGhost             =>      M_Ghost_s,
+              romFood              =>      M_food_s,
               
-              -- CONNECTION WITH Memory INPUT PROM   
-              --addr_ghost1_ROM   =>      addr_ghost1_s,
-              addr_pacman_ROM   =>      addr_pacman_s,
-              addr_map_ROM      =>      addr_map_s,
+              
+              -- CONNECTION WITH Memory INPUT PROM
+              romAddressMap            =>  addr_map_s,
+              romAddressPacmanClosed   =>  addr_pacmanClosed_s,
+              romAddressPacmanOpened   =>  addr_pacmanOpened_s,
+              romAddressGhost          =>  addr_Ghost,
+              romAddressFood           =>  addr_food_s,            
+       
+
 
               red               =>      vgaRed, 
               green             =>      vgaGreen, 

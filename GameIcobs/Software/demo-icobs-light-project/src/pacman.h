@@ -6,6 +6,9 @@
 #include <time.h>
 #include <inttypes.h>
 
+#define LIMIT_Y 93
+#define LIMIT_X 52
+
 
 typedef struct
 {

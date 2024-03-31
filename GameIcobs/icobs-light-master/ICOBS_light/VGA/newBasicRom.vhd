@@ -39,37 +39,6 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
 
 BEGIN
 
-    -- ORIGEM DA IMAGEM: CANTO SUPERIOR ESQUERDO
-    -- PRIMEIRO CASO: COLOCAR NO CANTO SUPERIOR DIREITO
-    -- SEGUNDO CASO:  COLOCAR NO CANTO INFERIOR ESQUERDO
-    -- TERCEIRO CASO: COLOCAR NO CANTO INFERIOR DIREITO
-    
-    -- PRIMEIRO CASO: COLOCAR NO CANTO SUPERIOR DIREITO
-    -- QUANDO O XPIX ESTA NO RANGE: (XPIX >= TAM_HORZIONTAL + POS_INITIAL)  E (XPIX <= TAM_HORIZONTAL + TAM_HORIZONTAL + POS_INITIAL )
-    -- EM CÓDIGO:                   IF xpix >= W1 +  X_INIT_MAP AND xpix <= W1 + W1 + X_INIT_MAP)
-    
-    -- QUANDO O YPIX ESTA NO RANGE: (YPIX >= Y_INIT_MAP) E (YPIX <= 160 + Y_INIT_MAP)
-    -- EM CÓDIGO:                   IF(ypix >= Y_INIT_MAP) AND (ypix <= H1 + Y_INIT_MAP )
-    
-    -- NESTE CANTO DA TELA, PRECISO ESPELHAR NA HORIZONTAL, OU SEJA, LER O ENDEREÇO DA ROM DA DIREITA PARA A ESQUERDA
-    ---------------------------------------------------------------------------------------------------------------------
-    -- SEGUNDO CASO: COLOCAR NO CANTO INFERIOR ESQUERDO
-    -- QUANDO XPIX ESTA NO RANGE: (XPIX >= X_INIT_MAP + 0 ) E ( XPIX <= TAM_HORIZONTAL + X_INIT_MAP)
-    -- EM CÓDIGO:                 IF (xpix >= X_INIT_MAP ) AND ( xpix <= W1 + X_INIT_MAP)
-    
-    -- QUANDO O YPIX ESTA NO RANGE: (YPIX >= Y_INIT_MAP + TAM_VERTICAL) E (YPIX <=Y_INIT_MAP + TAM_VERTICAL + TAM+VERTICAL)
-    -- EM CÓDIGO:                   IF (ypix >= Y_INIT_MAP + H1) AND (ypix <= Y_INIT_MAP + H1 + H1)
-    
-    -- NESTE CANTO DA TELA, PRECISO LER DA ESQUERDA PARA DIREITA
-    ---------------------------------------------------------------------------------------------------------------------
-    -- TERCEIRO CASO: COLOCAR NO CANTO INFERIOR DIREITO
-    -- QUANDO O XPIX ESTA NO RANGE: (XPIX >= TAM_HORZIONTAL + POS_INITIAL)  E (XPIX <= TAM_HORIZONTAL + TAM_HORIZONTAL + POS_INITIAL )
-    -- EM CÓDIGO:                   IF xpix >= W1 +  X_INIT_MAP AND xpix <= W1 + W1 + X_INIT_MAP)
-    
-    -- QUANDO O YPIX ESTA NO RANGE: (YPIX >= Y_INIT_MAP + TAM_VERTICAL) E (YPIX <=Y_INIT_MAP + TAM_VERTICAL + TAM+VERTICAL)
-    -- EM CÓDIGO:                   IF (ypix >= Y_INIT_MAP + H1) AND (ypix <= Y_INIT_MAP + H1 + H1)
-    
-
     PROCESS (vc,hc)
     BEGIN
         IF (unsigned(hc) >= X_INIT_MAP + hbp AND unsigned(hc) < X_INIT_MAP + hbp + W1 AND
@@ -86,8 +55,8 @@ BEGIN
 
         IF (unsigned(hc) >= X_INIT_MAP + W1 + hbp AND unsigned(hc) < X_INIT_MAP + hbp + W1 + W1 AND
             unsigned(vc) >= Y_INIT_MAP + vbp AND unsigned(vc) < Y_INIT_MAP + vbp + H1) THEN
-            xpix <= unsigned(hc) - (hbp + X_INIT_MAP);      -- X_INIT_MAP = HORIZONTAL
-            ypix <= unsigned(vc) - (vbp + Y_INIT_MAP);      -- Y_INIT_MAP = VERTICAL
+            xpix <= (W1 - 1) - (unsigned(hc) - (hbp + X_INIT_MAP + W1)); -- INVERSÃO DO ENDEREÇO
+            ypix <= unsigned(vc) - (vbp + Y_INIT_MAP);                      -- Y_INIT_MAP = VERTICAL
             romAddressMap_s <= STD_LOGIC_VECTOR(TotalPixels(ypix, W1) + xpix);
             romAddressMap <= romAddressMap_s(15 downto 0);
             spriteOnRightTop <= '1';
@@ -96,27 +65,32 @@ BEGIN
         END IF; 
         
         IF (unsigned(hc) >= X_INIT_MAP + hbp AND unsigned(hc) < X_INIT_MAP + hbp + W1 AND
-            unsigned(vc) >= Y_INIT_MAP + H1 + vbp  AND unsigned(vc) < Y_INIT_MAP + vbp + H1 + H1 ) THEN
-            xpix <= unsigned(hc) - (hbp + X_INIT_MAP);           -- X_INIT_MAP = HORIZONTAL
-            ypix <= unsigned(vc) - (vbp + Y_INIT_MAP) - H1;      -- Y_INIT_MAP = VERTICAL
+            unsigned(vc) >= Y_INIT_MAP + H1 + vbp AND unsigned(vc) < Y_INIT_MAP + vbp + H1 + H1 ) THEN
+            xpix <= unsigned(hc) - (hbp + X_INIT_MAP);  -- X_INIT_MAP = HORIZONTAL
+            -- Aqui, invertemos a ordem vertical subtraindo ypix de H1 - 1.
+            ypix <= H1 - 1 - (unsigned(vc) - (vbp + Y_INIT_MAP) - H1);  -- Y_INIT_MAP = VERTICAL INVERTIDO
             romAddressMap_s <= STD_LOGIC_VECTOR(TotalPixels(ypix, W1) + xpix);
             romAddressMap <= romAddressMap_s(15 downto 0);
 
             spriteOnLeftDown <= '1';
-        ELSE 
+        ELSE
             spriteOnLeftDown <= '0';
         END IF;
 
         IF (unsigned(hc) >= X_INIT_MAP + W1 + hbp AND unsigned(hc) < X_INIT_MAP + hbp + W1 + W1 AND
             unsigned(vc) >= Y_INIT_MAP + H1 + vbp  AND unsigned(vc) < Y_INIT_MAP + vbp + H1 + H1 ) THEN
-            xpix <= unsigned(hc) - (hbp + X_INIT_MAP);           -- X_INIT_MAP = HORIZONTAL
-            ypix <= unsigned(vc) - (vbp + Y_INIT_MAP) - H1;      -- Y_INIT_MAP = VERTICAL
+            -- Cálculo para espelhamento horizontal
+            xpix <= W1 - 1 - (unsigned(hc) - (X_INIT_MAP + W1 + hbp));
+            -- Cálculo para espelhamento vertical
+            ypix <= H1 - 1 - (unsigned(vc) - (Y_INIT_MAP + H1 + vbp));
+        
             romAddressMap_s <= STD_LOGIC_VECTOR(TotalPixels(ypix, W1) + xpix);
             romAddressMap <= romAddressMap_s(15 downto 0);
             spriteOnRightDown <= '1';
         ELSE
             spriteOnRightDown <= '0';
         END IF;
+
 
     END PROCESS;
 
@@ -130,6 +104,7 @@ BEGIN
             red <= romMap(11 DOWNTO 8);
             green <= romMap(7 DOWNTO 4);
             blue <= romMap(3 DOWNTO 0);
+
         ELSIF vidon = '1' AND spriteOnRightTop = '1' THEN
             red <= romMap(11 DOWNTO 8);
             green <= romMap(7 DOWNTO 4);

@@ -2,10 +2,25 @@
 -flto: Enables Link-Time Optimization, which allows the compiler to perform optimizations across all compilation units during the link stage.
 -ffunction-sections and -fdata-sections: Place each function or data item into its own section in the output file, which can enable the linker to remove unused sections and potentially reduce the size of the executable.
 
-Map    = 280x155 and size Port A = 43400    -> compress 0.9 and 12
-Food   = 27x18 and size Port A = 486        -> compress 0.03 and 12
-Pacman = 45x45 and size Port A = 2025       -> compress 1 and 12
-Ghost  = 40x40 and size Port A = 1600       -> compress 1 and 12
+Map         = 280x155 and size Port A = 43400    -> compress 0.9 and 12
+Food        = 11x7 and size Port A = 77          -> compress 0.013 and 12
+PacmanOpen  = 29x29 and size Port A = 841        -> compress 0.09 and 12
+PacmanClose = 29x29 and size Port A = 841        -> compress 0.09 and 12
+Ghost       = 28x28 and size Port A = 784      -> compress 0.8 and 12
 
 
 Eu não estava conseguindo replicar a imagem no mesmo eixo X mas no eixo Y em baixo pois a ROM estava pegando um endereço que não valor correto. Então criei o process para poder coletar o endereço correto.
+
+Para espelhar as posições nas horizontais e verticais dependendo do lugar da imagem, precisamos mudar estas lihas:
+xpix <= unsigned(hc) - (hbp + X_INIT_MAP);      -- X_INIT_MAP = HORIZONTAL
+ypix <= unsigned(vc) - (vbp + Y_INIT_MAP);      -- Y_INIT_MAP = VERTICAL
+
+somente horizontal -> tratar como se estivesse no ultimo pixel da horizontal, então:
+xpix <= (W1 - 1) - (unsigned(hc) - (hbp + X_INIT_MAP + W1));
+
+somente vertical -> tratar como se estivesse no ultimo pixel da vertical, horizontal fica o mesmo:
+ypix <= H1 - 1 - (unsigned(vc) - (vbp + Y_INIT_MAP) - H1);
+
+horizontal e vertical junto -> inverter completamente, imaginar que estamos no ultimo pixel da horizontal e vertical ao mesmo tempo
+xpix <= (X_INIT_MAP + W1 + W1 - 1) - unsigned(hc);
+ypix <= (Y_INIT_MAP + H1 + H1 - 1) - unsigned(vc);

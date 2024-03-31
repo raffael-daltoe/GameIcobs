@@ -76,18 +76,18 @@ begin
 
         	sw                 => Background (11 DOWNTO 0),
 
-			R0				   => X0_Position(9 downto 0),
-			C0				   => Y0_Position(9 downto 0),	
-			R1				   => X1_Position(9 downto 0),
-			C1				   => Y1_Position(9 downto 0),
-			R2				   => X2_Position(9 downto 0),
-			C2				   => Y2_Position(9 downto 0),	
-			R3				   => X3_Position(9 downto 0),	
-			C3				   => Y3_Position(9 downto 0),	
-			R4				   => X4_Position(9 downto 0),
-			C4				   => Y4_Position(9 downto 0),
-			R5				   => X5_Position(9 downto 0),
-			C5				   => Y5_Position(9 downto 0),
+			R0				   => Y0_Position(9 downto 0),
+			C0				   => X0_Position(9 downto 0),	
+			R1				   => Y1_Position(9 downto 0),
+			C1				   => X1_Position(9 downto 0),
+			R2				   => Y2_Position(9 downto 0),
+			C2				   => X2_Position(9 downto 0),	
+			R3				   => Y3_Position(9 downto 0),	
+			C3				   => X3_Position(9 downto 0),	
+			R4				   => Y4_Position(9 downto 0),
+			C4				   => X4_Position(9 downto 0),
+			R5				   => Y5_Position(9 downto 0),
+			C5				   => X5_Position(9 downto 0),
                 
             vgaRed		   	   => vgaRed_ahblite,
             vgaGreen   		   => vgaGreen_ahblite,
@@ -165,8 +165,8 @@ begin
 					SlaveOut.HRDATA <= (others => '0');
 					case address is
 						when x"00" => SlaveOut.HRDATA <= Background;
-						when x"01" => SlaveOut.HRDATA <= X1_Position;
-						when x"02" => SlaveOut.HRDATA <= Y1_Position;
+						when x"01" => SlaveOut.HRDATA <= X0_Position;
+						when x"02" => SlaveOut.HRDATA <= Y0_Position;
 						when x"03" => SlaveOut.HRDATA <= X1_Position;
 						when x"04" => SlaveOut.HRDATA <= Y1_Position;
 						when x"05" => SlaveOut.HRDATA <= X2_Position;
