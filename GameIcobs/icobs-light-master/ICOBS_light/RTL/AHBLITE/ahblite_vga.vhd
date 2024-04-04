@@ -61,6 +61,7 @@ architecture arch of ahblite_vga is
     signal Background : std_logic_vector(31 downto 0);
     signal Scoreboard : std_logic_vector(31 downto 0);
 
+	signal Register_Foods : std_logic_vector(31 downto 0);
 	signal X0_Position, Y0_Position : std_logic_vector(31 downto 0);
 	
 	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
@@ -69,7 +70,7 @@ architecture arch of ahblite_vga is
 	signal X3_Position, Y3_Position : std_logic_vector(31 downto 0);
 	signal X4_Position, Y4_Position : std_logic_vector(31 downto 0);
 
-	--signal X5_Position, Y5_Position : std_logic_vector(31 downto 0);
+
 ----------------------------------------------------------------
 begin
 
@@ -91,18 +92,12 @@ begin
 			C3				   => X3_Position(9 downto 0),	
 			R4				   => Y4_Position(9 downto 0),
 			C4				   => X4_Position(9 downto 0),
-			--R5				   => Y5_Position(9 downto 0),
-			--C5				   => X5_Position(9 downto 0),
-                
+            Register_Foods_S   => Register_Foods,
+            
             vgaRed		   	   => vgaRed_ahblite,
             vgaGreen   		   => vgaGreen_ahblite,
-            vgaBlue   		   => vgaBLue_ahblite,
+            vgaBlue   		   => vgaBLue_ahblite
 
-			Scoreboard   	   => Scoreboard
-
-			--seg  			   => seg,
-			--an   			   => an,
-			--dp   			   => dp
         );
 
 	U_SEG_CTRL: entity work.seg_top port map(
@@ -140,17 +135,19 @@ begin
 			lastaddr <= (others => '0');
 
 			-- Reset values
-            Background  <= (others => '0');
-			Y0_Position <= (others => '0');
-			X0_Position <= (others => '0');
-			Y1_Position <= (others => '0');
-			X1_Position <= (others => '0');
-			Y2_Position <= (others => '0');
-			X2_Position <= (others => '0');
-			Y3_Position <= (others => '0');
-			X3_Position <= (others => '0');
-			Y4_Position <= (others => '0');
-			X4_Position <= (others => '0');
+            Background     <= (others => '0');
+			Y0_Position    <= (others => '0');
+			X0_Position    <= (others => '0');
+			Y1_Position    <= (others => '0');
+			X1_Position    <= (others => '0');
+			Y2_Position    <= (others => '0');
+			X2_Position    <= (others => '0');
+			Y3_Position    <= (others => '0');
+			X3_Position    <= (others => '0');
+			Y4_Position    <= (others => '0');
+			X4_Position    <= (others => '0');
+			--Scoreboard     <= (others => '0');
+			Register_Foods <= (others => '0');
 			--Scoreboard <=  (others => '0');
 			--Y5_Position <= (others => '0');
 			--X5_Position <= (others => '0');
@@ -175,7 +172,7 @@ begin
 					when x"08" => Y3_Position <= SlaveIn.HWDATA;
 					when x"09" => X4_Position <= SlaveIn.HWDATA;
 					when x"0A" => Y4_Position <= SlaveIn.HWDATA;
-					--when x"0B" => Scoreboard  <= SlaveIn.HWDATA;
+					when x"0B" => Register_Foods  <= SlaveIn.HWDATA;
 					--when x"0B" => X5_Position <= SlaveIn.HWDATA;
 					--when x"0C" => Y5_Position <= SlaveIn.HWDATA;
 					
@@ -200,7 +197,7 @@ begin
 						when x"08" => SlaveOut.HRDATA <= Y3_Position;
 						when x"09" => SlaveOut.HRDATA <= X4_Position;
 						when x"0A" => SlaveOut.HRDATA <= Y4_Position;
-						--when x"0B" => SlaveOut.HRDATA <= Scoreboard;
+						when x"0B" => SlaveOut.HRDATA <= Register_Foods;
 						--when x"0B" => SlaveOut.HRDATA <= X5_Position;
 						--when x"0C" => SlaveOut.HRDATA <= Y5_Position;
 						when others =>

@@ -51,11 +51,12 @@ C_CXX_FLAGS = \
 		-flto  \
 		-Wall -Wextra \
 		-static -mcmodel=medany -O3 \
-		-ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce
+		-ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce \
+		-Wno-sign-compare
 
 GFLAGS   = -march=rv32imc -mabi=ilp32
 CFLAGS   = $(addprefix -D, $(MACROS)) $(C_CXX_FLAGS)
-CXXFLAGS = $(addprefix -D, $(MACROS)) $(C_CXX_FLAGS) -fno-use-cxa-atexit
+CXXFLAGS = $(addprefix -D, $(MACROS)) $(C_CXX_FLAGS) -fno-use-cxa-atexit 
 LDFLAGS  = -Wl,--gc-sections -Wl,-Map=$(OUTDIR)/$(PROJECT).map -nostdlib -nostartfiles
 
 OBJ = $(SRC:%=$(OBJDIR)/%.o)

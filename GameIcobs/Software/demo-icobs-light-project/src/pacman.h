@@ -6,8 +6,7 @@
 #include <time.h>
 #include <inttypes.h>
 
-#define LIMIT_Y 93
-#define LIMIT_X 52
+#define RANGE 20
 
 
 typedef struct
@@ -15,5 +14,19 @@ typedef struct
     __uint8_t x;
     __uint8_t y;
 } Position;
+
+typedef struct
+{
+    int x_min;
+    int y_min;
+    int x_max;
+    int y_max;
+} Obstacle;
+
+typedef struct 
+{
+    int x;
+    int y;
+}Food_Pos;
 
 #endif

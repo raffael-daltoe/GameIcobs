@@ -12,8 +12,7 @@ ENTITY VGA_Basic_ROM IS
         vc                      : IN vector10;               
         sw                      : IN vector12;   -- SWITCH OF FPGA
         changePacman            : IN STD_LOGIC;
-        rst                     : IN STD_LOGIC;
-        clk                     : IN STD_LOGIC;
+        
         --  REGISTERS
         R_SW0                      : in unsigned(9 downto 0);  -- CONTROL OF PACMAN HORIZONTAL
         C_SW0                      : in unsigned(9 downto 0);  -- CONTROL OF PACMAN VERITICAL
@@ -26,7 +25,7 @@ ENTITY VGA_Basic_ROM IS
         C_SW3                      : in unsigned(9 downto 0);  -- CONTROL OF GHOST3
         R_SW4                      : in unsigned(9 downto 0);  -- CONTROL OF GHOST4
         C_SW4                      : in unsigned(9 downto 0);  -- CONTROL OF GHOST4
-        Eats                       : out std_logic_vector(31 downto 0);
+        Register_Foods             : in STD_LOGIC_VECTOR(31 DOWNTO 0); 
 
         -- ROM ADDRESSES
         romAddressMap               : OUT vector16;       -- MAP ADDRESS
@@ -61,6 +60,7 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     SIGNAL spritePacmanClose        : STD_LOGIC := '0';   
     SIGNAL spritePacmanOpen         : STD_LOGIC := '0';
 
+    SIGNAL spriteFood0             : STD_LOGIC := '0';
     SIGNAL spriteFood1              : STD_LOGIC := '0';
     SIGNAL spriteFood2              : STD_LOGIC := '0';
     SIGNAL spriteFood3              : STD_LOGIC := '0';
@@ -81,35 +81,11 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     SIGNAL spriteFood18             : STD_LOGIC := '0';
     SIGNAL spriteFood19             : STD_LOGIC := '0';
     SIGNAL spriteFood20             : STD_LOGIC := '0';
-    SIGNAL spriteFood21             : STD_LOGIC := '0';
     
     SIGNAL spriteGhost1             : STD_LOGIC := '0';
     SIGNAL spriteGhost2             : STD_LOGIC := '0';
     SIGNAL spriteGhost3             : STD_LOGIC := '0';
     SIGNAL spriteGhost4             : STD_LOGIC := '0';
-
-    -- FLAGS EATED FOOD
-    SIGNAL EATED1                  : STD_LOGIC := '0';
-    SIGNAL EATED2                  : STD_LOGIC := '0';
-    SIGNAL EATED3                  : STD_LOGIC := '0';
-    SIGNAL EATED4                  : STD_LOGIC := '0';
-    SIGNAL EATED5                  : STD_LOGIC := '0';
-    SIGNAL EATED6                  : STD_LOGIC := '0';
-    SIGNAL EATED7                  : STD_LOGIC := '0';
-    SIGNAL EATED8                  : STD_LOGIC := '0';
-    SIGNAL EATED9                  : STD_LOGIC := '0';
-    SIGNAL EATED10                 : STD_LOGIC := '0';   
-    SIGNAL EATED11                 : STD_LOGIC := '0';
-    SIGNAL EATED12                 : STD_LOGIC := '0';
-    SIGNAL EATED13                 : STD_LOGIC := '0';
-    SIGNAL EATED14                 : STD_LOGIC := '0';
-    SIGNAL EATED15                 : STD_LOGIC := '0';
-    SIGNAL EATED16                 : STD_LOGIC := '0';
-    SIGNAL EATED17                 : STD_LOGIC := '0';
-    SIGNAL EATED18                 : STD_LOGIC := '0';
-    SIGNAL EATED19                 : STD_LOGIC := '0';
-    SIGNAL EATED21                 : STD_LOGIC := '0';
-    SIGNAL EATED20                 : STD_LOGIC := '0';
 
     -- DECLARATION OF SIGNALS COORDINATES AND ADDRESS OF ROM
     SIGNAL xpix, ypix               : UNSIGNED(9 DOWNTO 0);
@@ -124,178 +100,7 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     SIGNAL romAddressPacmanOpened_s : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressFood_s         : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressGhost_s        : STD_LOGIC_VECTOR(19 DOWNTO 0);
-    SIGNAL EATS_s                   : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
-
-    process(clk, rst)
-    begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                Eats <= (others => '0');
-            else
-                Eats <= EATS_s;
-            end if;
-        end if;
-    end process;
-       
-    
-    
-    PROCESS (xpix_Pac, ypix_Pac, EATED1, EATED2, EATED3, 
-            EATED4, EATED5, EATED6, EATED7, EATED8, EATED9, EATED10, EATED11, EATED12, 
-            EATED13, EATED14, EATED15, EATED16, EATED17, EATED18, EATED19, EATED20, EATED21,rst)
-    BEGIN
-        IF rst = '1' THEN
-            EATS_s <= (others => '0');
-        ELSE
-            -- IF (xpix_Pac + 60 = X_INIT_FOOD1 OR xpix_Pac - 60 = X_INIT_FOOD1)  AND (ypix_Pac + 60 = Y_INIT_FOOD1 OR ypix_Pac - 60 = Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED1 <= '1';
-            -- END IF;
-
-            -- IF (C_SW0 + 60 = X_INIT_FOOD1 OR C_SW0 - 60 = X_INIT_FOOD1)  AND (R_SW0 + 60 = Y_INIT_FOOD1 OR R_SW0 - 60 = Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-                -- EATS_s <= EATS_s + 1 ;
-                -- EATED1 <= '1';
-            -- END IF;
-
-            -- IF (ypix_Pac + 50 = X_INIT_FOOD1 OR ypix_Pac - 50 = X_INIT_FOOD1)  AND (xpix_Pac + 50 = Y_INIT_FOOD1 OR xpix_Pac - 50 = Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED1 <= '1';
-            -- END IF;
-
-            IF (R_SW0 + 60 >= X_INIT_FOOD1 OR R_SW0 - 60 <= X_INIT_FOOD1)  AND (C_SW0 + 60 >= Y_INIT_FOOD1 OR C_SW0 - 60 <= Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-                EATS_s <= EATS_s + 1 ;
-                EATED1 <= '1';
-            END IF;
-
-            IF (C_SW0 + 50 = X_INIT_FOOD1 OR C_SW0 - 50 = X_INIT_FOOD1)  AND (R_SW0 + 50 = Y_INIT_FOOD1 OR R_SW0 - 50 = Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-                EATS_s <= EATS_s + 1 ;
-                EATED1 <= '1';
-            END IF;
-
-            -- IF (C_SW0 + 20 = X_INIT_FOOD2 OR C_SW0 - 20 = X_INIT_FOOD2)  AND (R_SW0 + 20 = Y_INIT_FOOD2 OR R_SW0 - 20 = Y_INIT_FOOD2 ) AND EATED2 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED2 <= '1';
-            -- END IF;
-
-            IF (xpix_Pac + 30 = X_INIT_FOOD2 OR xpix_Pac - 30 = X_INIT_FOOD2)  AND (ypix_Pac + 30 = Y_INIT_FOOD2 OR ypix_Pac - 30 = Y_INIT_FOOD2 ) AND EATED2 = '0' THEN
-                EATS_s <= EATS_s + 1 ;
-                EATED2 <= '1';
-            END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD3 OR xpix_Pac - 20 = X_INIT_FOOD3)  AND (ypix_Pac + 20 = Y_INIT_FOOD3 OR ypix_Pac - 20 = Y_INIT_FOOD3 ) AND EATED3 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED3 <= '1';
-            -- END IF;
-
-            -- IF (R_SW0 + 20 = X_INIT_FOOD3 OR R_SW0 - 20 = X_INIT_FOOD3)  AND (C_SW0 + 20 = Y_INIT_FOOD3 OR C_SW0 - 20 = Y_INIT_FOOD3 ) AND EATED3 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED3 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD4 OR xpix_Pac - 20 = X_INIT_FOOD4)  AND (ypix_Pac + 20 = Y_INIT_FOOD4 OR ypix_Pac - 20 = Y_INIT_FOOD4 ) AND EATED4 = '0' THEN
-            --     EATS_s <= EATS_s + 1 ;
-            --     EATED4 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD5 OR xpix_Pac - 20 = X_INIT_FOOD5) AND (ypix_Pac + 20 = Y_INIT_FOOD5 OR ypix_Pac - 20 = Y_INIT_FOOD5) AND EATED5 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED5 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD6 OR xpix_Pac - 20 = X_INIT_FOOD6) AND (ypix_Pac + 20 = Y_INIT_FOOD6 OR ypix_Pac - 20 = Y_INIT_FOOD6) AND EATED6 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED6 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD7 OR xpix_Pac - 20 = X_INIT_FOOD7) AND (ypix_Pac + 20 = Y_INIT_FOOD7 OR ypix_Pac - 20 = Y_INIT_FOOD7) AND EATED7 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED7 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD8 OR xpix_Pac - 20 = X_INIT_FOOD8) AND (ypix_Pac + 20 = Y_INIT_FOOD8 OR ypix_Pac - 20 = Y_INIT_FOOD8) AND EATED8 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED8 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD9 OR xpix_Pac - 20 = X_INIT_FOOD9) AND (ypix_Pac + 20 = Y_INIT_FOOD9 OR ypix_Pac - 20 = Y_INIT_FOOD9) AND EATED9 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED9 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD10 OR xpix_Pac - 20 = X_INIT_FOOD10) AND (ypix_Pac + 20 = Y_INIT_FOOD10 OR ypix_Pac - 20 = Y_INIT_FOOD10) AND EATED10 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED10 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD11 OR xpix_Pac - 20 = X_INIT_FOOD11) AND (ypix_Pac + 20 = Y_INIT_FOOD11 OR ypix_Pac - 20 = Y_INIT_FOOD11) AND EATED11 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED11 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD12 OR xpix_Pac - 20 = X_INIT_FOOD12) AND (ypix_Pac + 20 = Y_INIT_FOOD12 OR ypix_Pac - 20 = Y_INIT_FOOD12) AND EATED12 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED12 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD13 OR xpix_Pac - 20 = X_INIT_FOOD13) AND (ypix_Pac + 20 = Y_INIT_FOOD13 OR ypix_Pac - 20 = Y_INIT_FOOD13) AND EATED13 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED13 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD14 OR xpix_Pac - 20 = X_INIT_FOOD14) AND (ypix_Pac + 20 = Y_INIT_FOOD14 OR ypix_Pac - 20 = Y_INIT_FOOD14) AND EATED14 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED14 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD15 OR xpix_Pac - 20 = X_INIT_FOOD15) AND (ypix_Pac + 20 = Y_INIT_FOOD15 OR ypix_Pac - 20 = Y_INIT_FOOD15) AND EATED15 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED15 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD16 OR xpix_Pac - 20 = X_INIT_FOOD16) AND (ypix_Pac + 20 = Y_INIT_FOOD16 OR ypix_Pac - 20 = Y_INIT_FOOD16) AND EATED16 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED16 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD17 OR xpix_Pac - 20 = X_INIT_FOOD17) AND (ypix_Pac + 20 = Y_INIT_FOOD17 OR ypix_Pac - 20 = Y_INIT_FOOD17) AND EATED17 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED17 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD18 OR xpix_Pac - 20 = X_INIT_FOOD18) AND (ypix_Pac + 20 = Y_INIT_FOOD18 OR ypix_Pac - 20 = Y_INIT_FOOD18) AND EATED18 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED18 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD19 OR xpix_Pac - 20 = X_INIT_FOOD19) AND (ypix_Pac + 20 = Y_INIT_FOOD19 OR ypix_Pac - 20 = Y_INIT_FOOD19) AND EATED19 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED19 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD20 OR xpix_Pac - 20 = X_INIT_FOOD20) AND (ypix_Pac + 20 = Y_INIT_FOOD20 OR ypix_Pac - 20 = Y_INIT_FOOD20) AND EATED20 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED20 <= '1';
-            -- END IF;
-
-            -- IF (xpix_Pac + 20 = X_INIT_FOOD21 OR xpix_Pac - 20 = X_INIT_FOOD21) AND (ypix_Pac + 20 = Y_INIT_FOOD21 OR ypix_Pac - 20 = Y_INIT_FOOD21) AND EATED21 = '0' THEN
-            --     EATS_s <= EATS_s + 1;
-            --     EATED21 <= '1';
-            -- END IF;
-        END IF;
-
-
-
-        -- IF (xpix_Pac + 20 = X_INIT_FOOD1 OR xpix_Pac - 20 = X_INIT_FOOD1)  AND (ypix + 20 = Y_INIT_FOOD1 OR ypix + 20 = Y_INIT_FOOD1 ) AND EATED1 = '0' THEN
-        --     EATS_s <= EATS_s + 1 ;
-        --     EATED1 <= '1';
-        -- END IF;
-
-        -- IF R_SW0 = X_INIT_FOOD1 AND C_SW0 = Y_INIT_FOOD1 AND EATED1 = '0' THEN
-        --     EATS_s <= EATS_s + 1 ;
-        --     EATED1 <= '1';
-        -- END IF;
-    END PROCESS;
-
 
 
     PROCESS (vc,hc,R_SW0,C_SW0,xpix,ypix,romAddressMap_s,romAddressPacmanOpened_s,
@@ -327,6 +132,17 @@ BEGIN
         END IF;
     --                                      FOODS
     --  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        IF (unsigned(hc) >= X_INIT_FOOD0 + hbp AND unsigned(hc) < X_INIT_FOOD0 + hbp + WFood AND
+            unsigned(vc) >= Y_INIT_FOOD0 + vbp AND unsigned(vc) < Y_INIT_FOOD0 + vbp + HFood) THEN
+            xpix_Food <= unsigned(hc) - (hbp + X_INIT_FOOD0);      
+            ypix_Food <= unsigned(vc) - (vbp + Y_INIT_FOOD0);    
+            romAddressFood_s <= STD_LOGIC_VECTOR(TotalPixels(ypix_Food, WFood) + xpix_Food);
+            romAddressFood <= romAddressFood_s(6 downto 0);
+            spriteFood0 <= '1';
+        ELSE
+            spriteFood0 <= '0';
+        END IF;
+
         IF (unsigned(hc) >= X_INIT_FOOD1 + hbp AND unsigned(hc) < X_INIT_FOOD1 + hbp + WFood AND
             unsigned(vc) >= Y_INIT_FOOD1 + vbp AND unsigned(vc) < Y_INIT_FOOD1 + vbp + HFood) THEN
             xpix_Food <= unsigned(hc) - (hbp + X_INIT_FOOD1);      
@@ -359,6 +175,7 @@ BEGIN
         ELSE
             spriteFood3 <= '0';
         END IF;
+
 
         IF (unsigned(hc) >= X_INIT_FOOD4 + hbp AND unsigned(hc) < X_INIT_FOOD4 + hbp + WFood AND
             unsigned(vc) >= Y_INIT_FOOD4 + vbp AND unsigned(vc) < Y_INIT_FOOD4 + vbp + HFood) THEN
@@ -548,17 +365,6 @@ BEGIN
             spriteFood20 <= '0';
         END IF;
 
-        IF (unsigned(hc) >= X_INIT_FOOD21 + hbp AND unsigned(hc) < X_INIT_FOOD21 + hbp + WFood AND
-            unsigned(vc) >= Y_INIT_FOOD21 + vbp AND unsigned(vc) < Y_INIT_FOOD21 + vbp + HFood) THEN
-            xpix_Food <= unsigned(hc) - (hbp + X_INIT_FOOD21);      
-            ypix_Food <= unsigned(vc) - (vbp + Y_INIT_FOOD21);    
-            romAddressFood_s <= STD_LOGIC_VECTOR(TotalPixels(ypix_Food, WFood) + xpix_Food);
-            romAddressFood <= romAddressFood_s(6 downto 0);
-            spriteFood21 <= '1';
-        ELSE
-            spriteFood21 <= '0';
-        END IF;
-
     --                                      GHOSTS
     --  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         IF (unsigned(hc) >= R_SW1 + hbp AND unsigned(hc) < R_SW1 + hbp + WGhost AND
@@ -654,104 +460,17 @@ BEGIN
 
     PROCESS (spriteOnLeftTop, spriteOnRightTop, spriteOnLeftDown, spriteOnRightDown, 
             spritePacmanOpen, spritePacmanClose, vidon, sw, romMap, romPacmanOpened,
-            romPacmanClosed, romFood, spriteFood1, spriteFood2, spriteFood3, spriteFood4,
+            romPacmanClosed, romFood,spriteFood0, spriteFood1, spriteFood2, spriteFood3, spriteFood4,
             spriteFood5, spriteFood6, spriteFood7, spriteFood8, spriteFood9, spriteFood10,
             spriteFood11, spriteFood12, spriteFood13, spriteFood14, spriteFood15, spriteFood16,
-            spriteFood17, spriteFood18, spriteFood19, spriteFood20, spriteFood21, spriteGhost1,
-            spriteGhost2, spriteGhost3, spriteGhost4, romGhost, EATED1, EATED2, EATED3, 
-            EATED4, EATED5, EATED6, EATED7, EATED8, EATED9, EATED10, EATED11, EATED12, 
-            EATED13, EATED14, EATED15, EATED16, EATED17, EATED18, EATED19, EATED20, EATED21)
+            spriteFood17, spriteFood18, spriteFood19, spriteFood20, spriteGhost1,
+            spriteGhost2, spriteGhost3, spriteGhost4, romGhost, Register_Foods)
     BEGIN
-        red <= (OTHERS => '0');
-        green <= (OTHERS => '0');
-        blue <= (OTHERS => '0');
+         red <= (OTHERS => '0');
+         green <= (OTHERS => '0');
+         blue <= (OTHERS => '0');
 
-        IF vidon = '1' AND spriteFood1 = '1' AND EATED1 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood2 = '1' AND EATED2 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood3 = '1' AND EATED3 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood4 = '1' AND EATED4 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood5 = '1' AND EATED5 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood6 = '1' AND EATED6 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood7 = '1' AND EATED7 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood8 = '1' AND EATED8 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood9 = '1' AND EATED9 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood10 = '1' AND EATED10 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood11 = '1' AND EATED11 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood12 = '1' AND EATED12 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood13 = '1' AND EATED13 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood14 = '1' AND EATED14 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood15 = '1' AND EATED15 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood16 = '1' AND EATED16 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood17 = '1' AND EATED17 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood18 = '1' AND EATED18 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood19 = '1' AND EATED19 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-            ELSIF vidon = '1' AND spriteFood20 = '1' AND EATED20 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteFood21 = '1' AND EATED21 = '0' THEN
-            red   <= romFood(11 DOWNTO 8);
-            green <= romFood(7 DOWNTO 4);
-            blue  <= romFood(3 DOWNTO 0);
-
-        ELSIF vidon = '1' AND spritePacmanOpen = '1' AND changePacman = '1' THEN
+        IF vidon = '1' AND spritePacmanOpen = '1' AND changePacman = '1' THEN
             IF romPacmanOpened = x"FFF" THEN
                 red   <= romMap(11 DOWNTO 8);
                 green <= romMap(7 DOWNTO 4);
@@ -771,6 +490,219 @@ BEGIN
                 green <= romPacmanClosed(7 DOWNTO 4);
                 blue  <= romPacmanClosed(3 DOWNTO 0);
             END IF;
+
+        ELSIF vidon = '1' AND spriteFood0 = '1' THEN
+            IF Register_Foods(0) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood1 = '1' THEN
+            IF Register_Foods(1) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood2 = '1' THEN
+            IF Register_Foods(2) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood3 = '1' THEN
+            IF Register_Foods(3) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood4 = '1' THEN
+            IF Register_Foods(4) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood5 = '1' THEN
+            IF Register_Foods(5) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood6 = '1' THEN
+            IF Register_Foods(6) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood7 = '1' THEN
+            IF Register_Foods(7) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood8 = '1' THEN
+            IF Register_Foods(8) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood9 = '1' THEN
+            IF Register_Foods(9) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood10 = '1' THEN
+            IF Register_Foods(10) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood11 = '1' THEN
+            IF Register_Foods(11) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood12 = '1' THEN
+            IF Register_Foods(12) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood13 = '1' THEN
+            IF Register_Foods(13) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood14 = '1' THEN
+            IF Register_Foods(14) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood15 = '1' THEN
+            IF Register_Foods(15) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood16 = '1'  THEN
+            IF Register_Foods(16) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood17 = '1' THEN
+            IF Register_Foods(17) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood18 = '1' THEN
+            IF Register_Foods(18) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood19 = '1' THEN
+            IF Register_Foods(19) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+        ELSIF vidon = '1' AND spriteFood20 = '1'  THEN
+            IF Register_Foods(20) = '0' THEN 
+                red   <= romFood(11 DOWNTO 8);
+                green <= romFood(7 DOWNTO 4);
+                blue  <= romFood(3 DOWNTO 0);
+            ELSE
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            END IF;
+
+
         ELSIF vidon = '1' AND spriteGhost1 = '1' THEN       -- BLUE
             IF romGhost = x"FFF" THEN       
                 red   <= romMap(11 DOWNTO 8);
