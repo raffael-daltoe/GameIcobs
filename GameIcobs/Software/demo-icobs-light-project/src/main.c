@@ -64,23 +64,13 @@
 #define SW15 GPIOA.IDRbits.P15
 /*				PROTOTYPES OF FUNCTIONS					*/
 
-static void countPoints(char maze[10][20]);
-static void movementPacman(char maze[10][20], __uint8_t *posX,
-                           __uint8_t *posY, char movement);
-static __uint8_t isPositionOccupiedByGhost(Position ghosts[],
-                                           __uint8_t numGhosts, __uint8_t x, __uint8_t y);
-static __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts,
-                                 __uint8_t posX, __uint8_t posY);
-static void moveGhosts(Position ghosts[],
-                       __uint8_t numGhosts, __uint8_t posX, __uint8_t posY, __uint8_t difficulty);
+//static void moveGhosts(int numGhosts, int posX, int posY, int difficulty);
 static void eaten(int i);
 static int check_collision(int x, int y);
 
 /*					GLOBAL VARIABLES					*/
 int TIMER_FLAG = 0;
-__uint8_t points = 0;
-__uint8_t totalPoints = 0;
-__uint8_t running = 1;
+Position ghosts[] = {{0,0},{0,0},{0,0},{0,0}};
 
 static void timer_clock_cb(int code)
 {
@@ -88,152 +78,31 @@ static void timer_clock_cb(int code)
     ((void)code);
 }
 
-static void countPoints(char maze[10][20])
-{
-    for (__uint8_t i = 0; i < 10; i++)
-    {
-        for (__uint8_t j = 0; j < 20; j++)
-        {
-            if (maze[i][j] == '.')
-            {
-                totalPoints++;
-            }
-        }
-    }
-}
+// static void moveGhosts(int numGhosts, int posX, int posY, int difficulty) {
+//     int directions[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // Direções: Up, Down, Left, Right
 
-static void movementPacman(char maze[10][20], __uint8_t *posX,
-                           __uint8_t *posY, char movement)
-{
-    __uint8_t newPosX = *posX, newPosY = *posY;
+//     for (int i = 0; i < numGhosts; i++) {
+//         for (int dir = 0; dir < 4; dir++) {
+//             int newPosX = ghosts[i].x + directions[dir][0];
+//             int newPosY = ghosts[i].y + directions[dir][1];
 
-    switch (movement)
-    {
-    case 'w':
-        newPosY--;
-        break;
-    case 's':
-        newPosY++;
-        break;
-    case 'a':
-        newPosX--;
-        break;
-    case 'd':
-        newPosX++;
-        break;
-    default:
-        printf("Invalid key.\n");
-        return;
-    }
-
-    // To Verify if the next pos is a wall or ghost
-    if (maze[newPosY][newPosX] == 'X')
-    {
-        printf("Invalid Movement ! Wall .\n");
-        return;
-    }
-
-    // To verify if the next position have a point
-    if (maze[newPosY][newPosX] == '.')
-    {
-        points++; // collect the point
-
-        maze[newPosY][newPosX] = ' '; // Remove de point of maze
-    }
-
-    // Update the pos of PACMAN
-    *posX = newPosX;
-    *posY = newPosY;
-}
-
-static __uint8_t isPositionOccupiedByGhost(Position ghosts[],
-                                           __uint8_t numGhosts, __uint8_t x, __uint8_t y)
-{
-    for (__uint8_t i = 0; i < numGhosts; i++)
-    {
-        if (ghosts[i].x == x && ghosts[i].y == y)
-        {
-            return 1; // Busy Position
-        }
-    }
-    return 0; // Free Position
-}
-
-static void moveGhosts(Position ghosts[],
-                       __uint8_t numGhosts, __uint8_t posX, __uint8_t posY, __uint8_t difficulty)
-{
-    for (__uint8_t i = 0; i < numGhosts; i++)
-    {
-        __uint8_t newPosX = ghosts[i].x;
-        __uint8_t newPosY = ghosts[i].y;
-
-        // Pseudo-random direction based on ghost's current position and Pacman's position
-        __uint8_t pseudoRandomDirection = (ghosts[i].x + ghosts[i].y + posX + posY) % 4;
-
-        // Attempt to move ghost in pseudo-random direction
-        switch (pseudoRandomDirection)
-        {
-        case 0: // Move up
-            newPosY = newPosY > 0 ? newPosY - 1 : newPosY;
-            break;
-        case 1: // Move down
-            newPosY++;
-            break;
-        case 2: // Move left
-            newPosX = newPosX > 0 ? newPosX - 1 : newPosX;
-            break;
-        case 3: // Move right
-            newPosX++;
-            break;
-        }
-
-        // Check for collisions with the map boundaries and obstacles
-        if (!check_collision(newPosX, newPosY))
-        {
-            // Update ghost position if no collision
-            ghosts[i].x = newPosX;
-            ghosts[i].y = newPosY;
-        }
-        else
-        {
-            // If there's a collision, try a different direction
-            newPosX = ghosts[i].x;
-            newPosY = ghosts[i].y;
-            pseudoRandomDirection = (pseudoRandomDirection + 1) % 4;
-            // Similar movement code as above, adapted for the new direction
-            // This is a simplified logic to handle collisions
-        }
-    }
-    MY_VGA.X1_Position = ghosts[0].x;
-    MY_VGA.Y1_Position = ghosts[0].y;
-    MY_VGA.X2_Position = ghosts[1].x;
-    MY_VGA.Y2_Position = ghosts[1].y;
-    MY_VGA.X3_Position = ghosts[2].x;
-    MY_VGA.Y3_Position = ghosts[2].y;
-    MY_VGA.X4_Position = ghosts[3].x;
-    MY_VGA.Y4_Position = ghosts[3].y;
-
-    // Verify if is valid the position of the ghost
-    /*if (maze[newPosY][newPosX] != 'X' && !isPositionOccupiedByGhost(ghosts,
-                                                                    numGhosts, newPosX, newPosY))
-    {
-        ghosts[i].x = newPosX;
-        ghosts[i].y = newPosY;
-    }*/
-}
-
-static __uint8_t verifyCollision(Position ghost[], __uint8_t numGhosts,
-                                 __uint8_t posX, __uint8_t posY)
-{
-    for (__uint8_t i = 0; i < numGhosts; i++)
-    {
-        if (ghost[i].x == posX && ghost[i].y == posY)
-        {
-            return 1; // Collision detected
-        }
-    }
-    return 0; // without collisions
-}
+//             // Verificar se a nova posição é válida (não há colisões)
+//             if (!check_collision(newPosX, newPosY)) {
+//                 ghosts[i].x = newPosX;
+//                 ghosts[i].y = newPosY;
+//                 break; // Mover o fantasma e sair do loop
+//             }
+//         }
+//     }
+//     MY_VGA.Y1_Position = ghosts[0].y;    // blue
+//     MY_VGA.X1_Position = ghosts[0].x;    // blue
+//     MY_VGA.Y2_Position = ghosts[1].y;    // green
+//     MY_VGA.X2_Position = ghosts[1].x; // green
+//     MY_VGA.Y3_Position = ghosts[2].y;    // pink
+//     MY_VGA.X3_Position = ghosts[2].x;    // pink
+//     //MY_VGA.Y4_Position = ghosts[3].y;    // something
+//     //MY_VGA.X4_Position = ghosts[3].x;    // some color kk
+// }
 
 static void init_GPIO_and_UART()
 {
@@ -273,35 +142,38 @@ static void init_GPIO_and_UART()
 
     IBEX_ENABLE_INTERRUPTS;
 
-    myprintf("\n! --VGA Working--! \n");
+    myprintf("\n! The game will start... Haha Loser ! \n");
 
     set_timer_ms(1000, timer_clock_cb, 0);
 }
 
-/*Init positions ghosts
-X = [264]  |  Y = [212]
-X = [352]  |  Y = [217]
-X = [308]  |  Y = [262]
-X = [308]  |  Y = [216]*/
 static void init_Registers()
 {
     MY_VGA.Y0_Position = 60;
     MY_VGA.X0_Position = 110;
     MY_VGA.Y1_Position = 200;    // blue
     MY_VGA.X1_Position = 215;    // blue
-    MY_VGA.Y2_Position = 360;    // verde
-    MY_VGA.X2_Position = 550000; // verde
+    MY_VGA.Y2_Position = 360;    // green
+    MY_VGA.X2_Position = 320; // green
     MY_VGA.Y3_Position = 200;    // pink
-    MY_VGA.X3_Position = 210;    // pink
+    MY_VGA.X3_Position = 240;    // pink
     MY_VGA.Y4_Position = 500;    // something
     MY_VGA.X4_Position = 320;    // some color kk
-    // MY_VGA.Y5_Position = 0;
-    // MY_VGA.X5_Position = 0;
     MY_VGA.Background = 0;
     MY_VGA.Register_Foods = 0x0;
+    MY_VGA.Scoreboard = 0x0;
+
+    // ghosts[0].x = MY_VGA.X1_Position;
+    // ghosts[0].y = MY_VGA.Y1_Position;
+    // ghosts[1].x = MY_VGA.X2_Position;
+    // ghosts[1].y = MY_VGA.Y2_Position;
+    // ghosts[2].x = MY_VGA.X3_Position;
+    // ghosts[2].y = MY_VGA.Y3_Position;
+    // ghosts[3].x = MY_VGA.X4_Position;
+    // ghosts[3].y = MY_VGA.Y4_Position;
+    
 }
 
-// Inclua todos os obstáculos que você coletou aqui
 Obstacle obstacles[] = {
     {102,64,197,101},
     {102,64,147,127},
@@ -362,6 +234,7 @@ Food_Pos Food[] = {
     {151, 158},
     {266, 390}};
 
+
 int obstacle_count = sizeof(obstacles) / sizeof(obstacles[0]);
 int food_count = sizeof(Food) / sizeof(Food[0]);
 
@@ -372,73 +245,99 @@ static int check_collision(int x, int y)
         if (x >= obstacles[i].x_min && x <= obstacles[i].x_max &&
             y >= obstacles[i].y_min && y <= obstacles[i].y_max)
         {
-            return 1; // Colisão detectada
+            return 1; // Collision detected
         }
     }
 
-    return 0; // Nenhuma colisão
+    return 0; // none colisão
 }
 
 static void verifyEats()
 {
-    if (((MY_VGA.X0_Position >= Food[0].x - RANGE && MY_VGA.X0_Position <= Food[0].x + RANGE)) && MY_VGA.Y0_Position >= Food[0].y - RANGE && MY_VGA.Y0_Position <= Food[0].y + RANGE)
+    if ((MY_VGA.X0_Position >= Food[0].x - RANGE && MY_VGA.X0_Position <= Food[0].x + RANGE)
+    && MY_VGA.Y0_Position >= Food[0].y - RANGE && MY_VGA.Y0_Position <= Food[0].y + RANGE)
         eaten(0);
 
-    if (MY_VGA.X0_Position >= Food[1].x - RANGE && MY_VGA.X0_Position <= Food[1].x + RANGE && MY_VGA.Y0_Position >= Food[1].y - RANGE && MY_VGA.Y0_Position <= Food[1].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[1].x - RANGE && MY_VGA.X0_Position <= Food[1].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[1].y - RANGE && MY_VGA.Y0_Position <= Food[1].y + RANGE)
         eaten(1);
 
-    if (MY_VGA.X0_Position >= Food[2].x - RANGE && MY_VGA.X0_Position <= Food[2].x + RANGE && MY_VGA.Y0_Position >= Food[2].y - RANGE && MY_VGA.Y0_Position <= Food[2].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[2].x - RANGE && MY_VGA.X0_Position <= Food[2].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[2].y - RANGE && MY_VGA.Y0_Position <= Food[2].y + RANGE)
         eaten(2);
 
-    if (MY_VGA.X0_Position >= Food[3].x - RANGE && MY_VGA.X0_Position <= Food[3].x + RANGE && MY_VGA.Y0_Position >= Food[3].y - RANGE && MY_VGA.Y0_Position <= Food[3].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[3].x - RANGE && MY_VGA.X0_Position <= Food[3].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[3].y - RANGE && MY_VGA.Y0_Position <= Food[3].y + RANGE)
         eaten(3);
 
-    if (MY_VGA.X0_Position >= Food[4].x - RANGE && MY_VGA.X0_Position <= Food[4].x + RANGE && MY_VGA.Y0_Position >= Food[4].y - RANGE && MY_VGA.Y0_Position <= Food[4].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[4].x - RANGE && MY_VGA.X0_Position <= Food[4].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[4].y - RANGE && MY_VGA.Y0_Position <= Food[4].y + RANGE)
         eaten(4);
-
-    if (MY_VGA.X0_Position >= Food[5].x - RANGE && MY_VGA.X0_Position <= Food[5].x + RANGE && MY_VGA.Y0_Position >= Food[5].y - RANGE && MY_VGA.Y0_Position <= Food[5].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[5].x - RANGE && MY_VGA.X0_Position <= Food[5].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[5].y - RANGE && MY_VGA.Y0_Position <= Food[5].y + RANGE)
         eaten(5);
 
-    if (MY_VGA.X0_Position >= Food[6].x - RANGE && MY_VGA.X0_Position <= Food[6].x + RANGE && MY_VGA.Y0_Position >= Food[6].y - RANGE && MY_VGA.Y0_Position <= Food[6].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[6].x - RANGE && MY_VGA.X0_Position <= Food[6].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[6].y - RANGE && MY_VGA.Y0_Position <= Food[6].y + RANGE)
         eaten(6);
 
-    if (MY_VGA.X0_Position >= Food[7].x - RANGE && MY_VGA.X0_Position <= Food[7].x + RANGE && MY_VGA.Y0_Position >= Food[7].y - RANGE && MY_VGA.Y0_Position <= Food[7].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[7].x - RANGE && MY_VGA.X0_Position <= Food[7].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[7].y - RANGE && MY_VGA.Y0_Position <= Food[7].y + RANGE)
         eaten(7);
 
-    if (MY_VGA.X0_Position >= Food[8].x - RANGE && MY_VGA.X0_Position <= Food[8].x + RANGE && MY_VGA.Y0_Position >= Food[8].y - RANGE && MY_VGA.Y0_Position <= Food[8].y + RANGE)
-        eaten(8);
+    if (MY_VGA.X0_Position >= Food[8].x - RANGE && MY_VGA.X0_Position <= Food[8].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[8].y - RANGE && MY_VGA.Y0_Position <= Food[8].y + RANGE)
+        eaten(8);    
 
-    if (MY_VGA.X0_Position >= Food[9].x - RANGE && MY_VGA.X0_Position <= Food[9].x + RANGE && MY_VGA.Y0_Position >= Food[9].y - RANGE && MY_VGA.Y0_Position <= Food[9].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[9].x - RANGE && MY_VGA.X0_Position <= Food[9].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[9].y - RANGE && MY_VGA.Y0_Position <= Food[9].y + RANGE)
         eaten(9);
 
-    if (MY_VGA.X0_Position >= Food[10].x - RANGE && MY_VGA.X0_Position <= Food[10].x + RANGE && MY_VGA.Y0_Position >= Food[10].y - RANGE && MY_VGA.Y0_Position <= Food[10].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[10].x - RANGE && MY_VGA.X0_Position <= Food[10].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[10].y - RANGE && MY_VGA.Y0_Position <= Food[10].y + RANGE)
         eaten(10);
 
-    if (MY_VGA.X0_Position >= Food[11].x - RANGE && MY_VGA.X0_Position <= Food[11].x + RANGE && MY_VGA.Y0_Position >= Food[11].y - RANGE && MY_VGA.Y0_Position <= Food[11].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[11].x - RANGE && MY_VGA.X0_Position <= Food[11].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[11].y - RANGE && MY_VGA.Y0_Position <= Food[11].y + RANGE)
         eaten(11);
 
-    if (MY_VGA.X0_Position >= Food[12].x - RANGE && MY_VGA.X0_Position <= Food[12].x + RANGE && MY_VGA.Y0_Position >= Food[12].y - RANGE && MY_VGA.Y0_Position <= Food[12].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[12].x - RANGE && MY_VGA.X0_Position <= Food[12].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[12].y - RANGE && MY_VGA.Y0_Position <= Food[12].y + RANGE)
         eaten(12);
-    if (MY_VGA.X0_Position >= Food[13].x - RANGE && MY_VGA.X0_Position <= Food[13].x + RANGE && MY_VGA.Y0_Position >= Food[13].y - RANGE && MY_VGA.Y0_Position <= Food[13].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[13].x - RANGE && MY_VGA.X0_Position <= Food[13].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[13].y - RANGE && MY_VGA.Y0_Position <= Food[13].y + RANGE)
         eaten(13);
-    if (MY_VGA.X0_Position >= Food[14].x - RANGE && MY_VGA.X0_Position <= Food[14].x + RANGE && MY_VGA.Y0_Position >= Food[14].y - RANGE && MY_VGA.Y0_Position <= Food[14].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[14].x - RANGE && MY_VGA.X0_Position <= Food[14].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[14].y - RANGE && MY_VGA.Y0_Position <= Food[14].y + RANGE)
         eaten(14);
 
-    if (MY_VGA.X0_Position >= Food[15].x - RANGE && MY_VGA.X0_Position <= Food[15].x + RANGE && MY_VGA.Y0_Position >= Food[15].y - RANGE && MY_VGA.Y0_Position <= Food[15].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[15].x - RANGE && MY_VGA.X0_Position <= Food[15].x + RANGE
+    && MY_VGA.Y0_Position >= Food[15].y - RANGE && MY_VGA.Y0_Position <= Food[15].y + RANGE)
         eaten(15);
-
-    if (MY_VGA.X0_Position >= Food[16].x - RANGE && MY_VGA.X0_Position <= Food[16].x + RANGE && MY_VGA.Y0_Position >= Food[16].y - RANGE && MY_VGA.Y0_Position <= Food[16].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[16].x - RANGE && MY_VGA.X0_Position <= Food[16].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[16].y - RANGE && MY_VGA.Y0_Position <= Food[16].y + RANGE)
         eaten(16);
 
-    if (MY_VGA.X0_Position >= Food[17].x - RANGE && MY_VGA.X0_Position <= Food[17].x + RANGE && MY_VGA.Y0_Position >= Food[17].y - RANGE && MY_VGA.Y0_Position <= Food[17].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[17].x - RANGE && MY_VGA.X0_Position <= Food[17].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[17].y - RANGE && MY_VGA.Y0_Position <= Food[17].y + RANGE)
         eaten(17);
 
-    if (MY_VGA.X0_Position >= Food[18].x - RANGE && MY_VGA.X0_Position <= Food[18].x + RANGE && MY_VGA.Y0_Position >= Food[18].y - RANGE && MY_VGA.Y0_Position <= Food[18].y + RANGE)
+    if (MY_VGA.X0_Position >= Food[18].x - RANGE && MY_VGA.X0_Position <= Food[18].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[18].y - RANGE && MY_VGA.Y0_Position <= Food[18].y + RANGE)
         eaten(18);
-    if (MY_VGA.X0_Position >= Food[19].x - RANGE && MY_VGA.X0_Position <= Food[19].x + RANGE && MY_VGA.Y0_Position >= Food[19].y - RANGE && MY_VGA.Y0_Position <= Food[19].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[19].x - RANGE && MY_VGA.X0_Position <= Food[19].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[19].y - RANGE && MY_VGA.Y0_Position <= Food[19].y + RANGE)
         eaten(19);
-    if (MY_VGA.X0_Position >= Food[20].x - RANGE && MY_VGA.X0_Position <= Food[20].x + RANGE && MY_VGA.Y0_Position >= Food[20].y - RANGE && MY_VGA.Y0_Position <= Food[20].y + RANGE)
+    
+    if (MY_VGA.X0_Position >= Food[20].x - RANGE && MY_VGA.X0_Position <= Food[20].x + RANGE 
+    && MY_VGA.Y0_Position >= Food[20].y - RANGE && MY_VGA.Y0_Position <= Food[20].y + RANGE)
         eaten(20);
+    
 }
 
 static void verifySwitchBackground()
@@ -516,7 +415,7 @@ static void verifyButtons()
         if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position + 1))
         {
             MY_VGA.Y0_Position++;
-            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+           // myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
     if (BTNL)
@@ -524,7 +423,7 @@ static void verifyButtons()
         if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position - 1))
         {
             MY_VGA.Y0_Position--;
-            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+           // myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
     if (BTND)
@@ -532,7 +431,7 @@ static void verifyButtons()
         if (!check_collision(MY_VGA.X0_Position + 1, MY_VGA.Y0_Position))
         {
             MY_VGA.X0_Position++;
-            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            //myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
 
@@ -541,58 +440,18 @@ static void verifyButtons()
         if (!check_collision(MY_VGA.X0_Position - 1, MY_VGA.Y0_Position))
         {
             MY_VGA.X0_Position--;
-            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            //myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
 }
 
 static void eaten(int i)
 {
-
-    if (i == 0)
-        MY_VGA.Register_Foods |= (1 << 0);
-    if (i == 1)
-        MY_VGA.Register_Foods |= (1 << 1);
-    if (i == 2)
-        MY_VGA.Register_Foods |= (1 << 2);
-    if (i == 3)
-        MY_VGA.Register_Foods |= (1 << 3);
-    if (i == 4)
-        MY_VGA.Register_Foods |= (1 << 4);
-    if (i == 5)
-        MY_VGA.Register_Foods |= (1 << 5);
-    if (i == 6)
-        MY_VGA.Register_Foods |= (1 << 6);
-    if (i == 7)
-        MY_VGA.Register_Foods |= (1 << 7);
-    if (i == 8)
-        MY_VGA.Register_Foods |= (1 << 8);
-    if (i == 9)
-        MY_VGA.Register_Foods |= (1 << 9);
-    if (i == 10)
-        MY_VGA.Register_Foods |= (1 << 10);
-    if (i == 11)
-        MY_VGA.Register_Foods |= (1 << 11);
-    if (i == 12)
-        MY_VGA.Register_Foods |= (1 << 12);
-    if (i == 13)
-        MY_VGA.Register_Foods |= (1 << 13);
-    if (i == 14)
-        MY_VGA.Register_Foods |= (1 << 14);
-    if (i == 15)
-        MY_VGA.Register_Foods |= (1 << 15);
-    if (i == 16)
-        MY_VGA.Register_Foods |= (1 << 16);
-    if (i == 17)
-        MY_VGA.Register_Foods |= (1 << 17);
-    if (i == 18)
-        MY_VGA.Register_Foods |= (1 << 18);
-    if (i == 19)
-        MY_VGA.Register_Foods |= (1 << 19);
-    if (i == 20)
-        MY_VGA.Register_Foods |= (1 << 20);
-
-    // return 0; // Nenhuma colisão
+    if (!(MY_VGA.Register_Foods & (1 << i)))  // if the food isn't eaten yet
+    {
+        MY_VGA.Register_Foods |= (1 << i);  // Define the bit to mark the food
+        MY_VGA.Scoreboard++;             
+    }   
 }
 
 //          ________________________________________________________
@@ -614,8 +473,9 @@ int main(void)
     init_GPIO_and_UART();
     init_Registers();
 
-    while (1)
+    while (true)
     {
+        //moveGhosts(4, MY_VGA.X0_Position, MY_VGA.Y0_Position, 3);
         delay_ms(1);
         verifyButtons();
         verifyEats();

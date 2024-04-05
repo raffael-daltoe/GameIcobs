@@ -148,7 +148,7 @@ begin
 			X4_Position    <= (others => '0');
 			--Scoreboard     <= (others => '0');
 			Register_Foods <= (others => '0');
-			--Scoreboard <=  (others => '0');
+			Scoreboard <=  (others => '0');
 			--Y5_Position <= (others => '0');
 			--X5_Position <= (others => '0');
 			
@@ -173,7 +173,7 @@ begin
 					when x"09" => X4_Position <= SlaveIn.HWDATA;
 					when x"0A" => Y4_Position <= SlaveIn.HWDATA;
 					when x"0B" => Register_Foods  <= SlaveIn.HWDATA;
-					--when x"0B" => X5_Position <= SlaveIn.HWDATA;
+					when x"0C" => Scoreboard <= SlaveIn.HWDATA;
 					--when x"0C" => Y5_Position <= SlaveIn.HWDATA;
 					
 					when others =>
@@ -198,7 +198,7 @@ begin
 						when x"09" => SlaveOut.HRDATA <= X4_Position;
 						when x"0A" => SlaveOut.HRDATA <= Y4_Position;
 						when x"0B" => SlaveOut.HRDATA <= Register_Foods;
-						--when x"0B" => SlaveOut.HRDATA <= X5_Position;
+						when x"0C" => SlaveOut.HRDATA <= Scoreboard;
 						--when x"0C" => SlaveOut.HRDATA <= Y5_Position;
 						when others =>
 					end case;

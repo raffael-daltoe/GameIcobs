@@ -14,6 +14,7 @@ typedef struct{
 	volatile unsigned int X4_Position; 
 	volatile unsigned int Y4_Position; 
 	volatile unsigned int Register_Foods;
+	volatile unsigned int Scoreboard;
 } MY_VGA_t;
 
 #endif

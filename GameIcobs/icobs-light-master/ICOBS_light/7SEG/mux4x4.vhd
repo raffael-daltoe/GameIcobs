@@ -47,10 +47,10 @@ begin
 prc : process (SEL,E1,E2,E3,E4)
 begin
 case SEL is
-     when "00" => SORTIE <= E1;
-     when "01" => SORTIE <= E2;
-     when "10" => SORTIE <= E3;
-     when "11" => SORTIE <= E4;
+     when "00" => SORTIE <= E4;
+     when "01" => SORTIE <= E3;
+     when "10" => SORTIE <= E2;
+     when "11" => SORTIE <= E1;
      when others => SORTIE <= (others => '0');
 end case;
 end process;
