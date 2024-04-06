@@ -2,6 +2,7 @@
 #include "pacman.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <limits.h>
 
 #define _BTNU_MODE GPIOC.MODEbits.P0
 #define BTNU GPIOC.IDRbits.P0
@@ -62,6 +63,8 @@
 
 #define _SW15_MODE GPIOA.MODEbits.P15
 #define SW15 GPIOA.IDRbits.P15
+
+#define TRIES 50
 /*				PROTOTYPES OF FUNCTIONS					*/
 
 //static void moveGhosts(int numGhosts, int posX, int posY, int difficulty);
@@ -78,31 +81,129 @@ static void timer_clock_cb(int code)
     ((void)code);
 }
 
-// static void moveGhosts(int numGhosts, int posX, int posY, int difficulty) {
-//     int directions[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // Direções: Up, Down, Left, Right
+uint8_t simple_rand(uint8_t seed) {
+    // Função simples de pseudo-aleatoriedade baseada em operações bitwise
+    uint8_t random = seed;
+    random ^= random << 3;
+    random ^= random >> 5;
+    random ^= random << 4;
+    return random;
+}
 
-//     for (int i = 0; i < numGhosts; i++) {
-//         for (int dir = 0; dir < 4; dir++) {
-//             int newPosX = ghosts[i].x + directions[dir][0];
-//             int newPosY = ghosts[i].y + directions[dir][1];
+static bool isPositionOccupiedByGhost(volatile unsigned int x, volatile unsigned int y)
+{
+    for (__uint8_t i = 0; i < GHOSTS; i++)
+    {
+        if (x == ghosts[i].x && y == ghosts[i].y)
 
-//             // Verificar se a nova posição é válida (não há colisões)
-//             if (!check_collision(newPosX, newPosY)) {
-//                 ghosts[i].x = newPosX;
-//                 ghosts[i].y = newPosY;
-//                 break; // Mover o fantasma e sair do loop
-//             }
-//         }
-//     }
-//     MY_VGA.Y1_Position = ghosts[0].y;    // blue
-//     MY_VGA.X1_Position = ghosts[0].x;    // blue
-//     MY_VGA.Y2_Position = ghosts[1].y;    // green
-//     MY_VGA.X2_Position = ghosts[1].x; // green
-//     MY_VGA.Y3_Position = ghosts[2].y;    // pink
-//     MY_VGA.X3_Position = ghosts[2].x;    // pink
-//     //MY_VGA.Y4_Position = ghosts[3].y;    // something
-//     //MY_VGA.X4_Position = ghosts[3].x;    // some color kk
-// }
+        {
+            return true; // Busy Position
+        }
+    }
+    return false; // Free Position
+}
+
+static bool isAreaFree(int newX, int newY, uint8_t currentGhostIndex) {
+    for (uint8_t i = 0; i < GHOSTS; i++) {
+        if (i != currentGhostIndex) {
+            // Define the boundaries for the current ghost's prospective area
+            int newLeft = newX, newRight = newX + SIZE_X_GHOST, newTop = newY, newBottom = newY + SIZE_Y_GHOST;
+
+            // Define the boundaries for the other ghost's current area
+            int otherLeft = ghosts[i].x, otherRight = ghosts[i].x + SIZE_X_GHOST;
+            int otherTop = ghosts[i].y, otherBottom = ghosts[i].y + SIZE_Y_GHOST;
+
+            // Check for overlap with any other ghost
+            if (newLeft < otherRight && newRight > otherLeft && newTop < otherBottom && newBottom > otherTop) {
+                return false; // Overlap detected
+            }
+        }
+    }
+    return true;
+}
+
+void moveGhostsAutomatically(uint8_t seed) {
+    uint8_t difficulty = 3; 
+    for (uint8_t i = 0; i < GHOSTS; i++)
+    {
+        uint8_t movement = simple_rand(seed) % 4;
+        volatile unsigned int newPosX = ghosts[i].x;
+        volatile unsigned int newPosY = ghosts[i].y;
+
+        if (difficulty == 2)
+        { // Medium : occasionally movement in direction to PACMAN
+            if (simple_rand(seed) % 4){ // 75% of chance of random movement, 25% of chance
+                                                            // to follow PACMAN
+                movement = simple_rand(seed) % 4;
+            }
+            else
+            {
+                if ( MY_VGA.X0_Position - ghosts[i].x >=  MY_VGA.Y0_Position - ghosts[i].y)
+                {
+                    movement = ghosts[i].x > MY_VGA.X0_Position ? 2 : 3; // left or right
+                }
+                else
+                {
+                    movement = ghosts[i].y > MY_VGA.Y0_Position ? 0 : 1; // above or below
+                }
+            }
+        }
+        else
+        { // Hard : movement smartest in direction to PACMAN
+            if (simple_rand(seed) % 2)
+            {                            // Alternance between axes X or Y
+                movement = newPosX > MY_VGA.X0_Position ? 2 : 3; // Left or Right 
+            }
+            else
+            {
+                movement = newPosY > MY_VGA.Y0_Position ? 0 : 1; //  above or below
+            }
+        }
+
+        switch (movement)
+        {
+        case 0:
+            newPosY-=1;
+            break;
+        case 1:
+            newPosY+=1;
+            break;
+        case 2:
+            newPosX-=1;
+            break;
+        case 3:
+            newPosX+=1;
+            break;
+        }
+
+        if(!check_collision(newPosX,newPosY) && isAreaFree(newPosX, newPosY, i) &&
+        (newPosX >=94 &&  newPosX <= 323 && newPosY >= 52 && newPosY <= 503)){
+            ghosts[i].x = newPosX;
+            ghosts[i].y = newPosY;
+            switch (i)
+            {
+            case 0:
+                MY_VGA.X1_Position = ghosts[0].x; 
+                MY_VGA.Y1_Position = ghosts[0].y;
+                break;
+            case 1:
+                MY_VGA.X2_Position = ghosts[1].x; 
+                MY_VGA.Y2_Position = ghosts[1].y;
+                break;     
+            case 2:
+                MY_VGA.X3_Position = ghosts[2].x; 
+                MY_VGA.Y3_Position = ghosts[2].y;
+                break;
+            case 3:
+                MY_VGA.X4_Position = ghosts[3].x; 
+                MY_VGA.Y4_Position = ghosts[3].y;
+                break;
+            }
+        }
+    }
+}
+
+
 
 static void init_GPIO_and_UART()
 {
@@ -142,7 +243,7 @@ static void init_GPIO_and_UART()
 
     IBEX_ENABLE_INTERRUPTS;
 
-    myprintf("\n! The game will start... Haha Loser ! \n");
+    //myprintf("\n! The game will start... Haha Loser ! \n");
 
     set_timer_ms(1000, timer_clock_cb, 0);
 }
@@ -151,26 +252,26 @@ static void init_Registers()
 {
     MY_VGA.Y0_Position = 60;
     MY_VGA.X0_Position = 110;
-    MY_VGA.Y1_Position = 200;    // blue
-    MY_VGA.X1_Position = 215;    // blue
-    MY_VGA.Y2_Position = 360;    // green
-    MY_VGA.X2_Position = 320; // green
-    MY_VGA.Y3_Position = 200;    // pink
-    MY_VGA.X3_Position = 240;    // pink
-    MY_VGA.Y4_Position = 500;    // something
-    MY_VGA.X4_Position = 320;    // some color kk
+    MY_VGA.Y1_Position = 242;    // blue
+    MY_VGA.X1_Position = 205;    // blue
+    MY_VGA.Y2_Position = 446;    // green
+    MY_VGA.X2_Position = 263;    // green
+    MY_VGA.Y3_Position = 370;    // pink
+    MY_VGA.X3_Position = 190;    // pink
+    MY_VGA.Y4_Position = 443;    // some color  
+    MY_VGA.X4_Position = 153;    // some color
     MY_VGA.Background = 0;
     MY_VGA.Register_Foods = 0x0;
     MY_VGA.Scoreboard = 0x0;
 
-    // ghosts[0].x = MY_VGA.X1_Position;
-    // ghosts[0].y = MY_VGA.Y1_Position;
-    // ghosts[1].x = MY_VGA.X2_Position;
-    // ghosts[1].y = MY_VGA.Y2_Position;
-    // ghosts[2].x = MY_VGA.X3_Position;
-    // ghosts[2].y = MY_VGA.Y3_Position;
-    // ghosts[3].x = MY_VGA.X4_Position;
-    // ghosts[3].y = MY_VGA.Y4_Position;
+    ghosts[0].x = MY_VGA.X1_Position;
+    ghosts[0].y = MY_VGA.Y1_Position;
+    ghosts[1].x = MY_VGA.X2_Position;
+    ghosts[1].y = MY_VGA.Y2_Position;
+    ghosts[2].x = MY_VGA.X3_Position;
+    ghosts[2].y = MY_VGA.Y3_Position;
+    ghosts[3].x = MY_VGA.X4_Position;
+    ghosts[3].y = MY_VGA.Y4_Position;
     
 }
 
@@ -414,24 +515,27 @@ static void verifyButtons()
     {
         if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position + 1))
         {
+                    //moveGhostsAutomatically(rand);
             MY_VGA.Y0_Position++;
-           // myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
     if (BTNL)
     {
         if (!check_collision(MY_VGA.X0_Position, MY_VGA.Y0_Position - 1))
         {
+                    //moveGhostsAutomatically(rand);
             MY_VGA.Y0_Position--;
-           // myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
     if (BTND)
     {
         if (!check_collision(MY_VGA.X0_Position + 1, MY_VGA.Y0_Position))
         {
+                    //moveGhostsAutomatically(rand);
             MY_VGA.X0_Position++;
-            //myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
 
@@ -439,11 +543,13 @@ static void verifyButtons()
     {
         if (!check_collision(MY_VGA.X0_Position - 1, MY_VGA.Y0_Position))
         {
+           // moveGhostsAutomatically(rand);
             MY_VGA.X0_Position--;
-            //myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
+            myprintf("X = [%d]  |  Y = [%d]\n", MY_VGA.X0_Position, MY_VGA.Y0_Position);
         }
     }
 }
+
 
 static void eaten(int i)
 {
@@ -453,6 +559,15 @@ static void eaten(int i)
         MY_VGA.Scoreboard++;             
     }   
 }
+
+// static void score(int Scoreboard)
+// {
+//     int unit = Scoreboard%10;
+//     int dizaine = Scoreboard/10 ;
+//     int hundreds= Scoreboard ;
+
+//     //MY_VGA.Sreg
+// }
 
 //          ________________________________________________________
 //        ._|                TABLE OF REGISTERS                    |_.
@@ -472,11 +587,13 @@ int main(void)
 {
     init_GPIO_and_UART();
     init_Registers();
+    uint8_t rand = 95;
 
     while (true)
     {
-        //moveGhosts(4, MY_VGA.X0_Position, MY_VGA.Y0_Position, 3);
+        rand++;
         delay_ms(1);
+        moveGhostsAutomatically(rand);
         verifyButtons();
         verifyEats();
         verifySwitchBackground();

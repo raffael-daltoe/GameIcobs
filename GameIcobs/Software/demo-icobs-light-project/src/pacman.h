@@ -5,14 +5,21 @@
 #include <stdlib.h>
 #include <time.h>
 #include <inttypes.h>
+#define MAX_X 321
+#define MIN_X 92
+#define MAX_Y 503
+#define MIN_Y 50
 
 #define RANGE 20
+#define GHOSTS 4
 
+#define SIZE_X_GHOST 24
+#define SIZE_Y_GHOST 24
 
 typedef struct
 {
-    __uint8_t x;
-    __uint8_t y;
+    volatile unsigned int x;
+    volatile unsigned int y;
 } Position;
 
 typedef struct

@@ -1,0 +1,16 @@
+rm -f -r build
+mkdir -p build
+mkdir -p build/lib/misc
+mkdir -p build/lib/libarch
+mkdir -p build/src
+riscv32-unknown-elf-as crt0.S -o build/crt0.S.o -c -march=rv32imc -mabi=ilp32
+riscv32-unknown-elf-gcc lib/misc/print.c -o build/lib/misc/print.c.o -c -MMD -MP -march=rv32imc -mabi=ilp32  -flto -Wall -Wextra -static -mcmodel=medany -O3 -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce -Wno-sign-compare -Ilib/ibex -Ilib/misc -Ilib/arch -Ilib/libarch -Isrc
+riscv32-unknown-elf-gcc lib/libarch/uart.c -o build/lib/libarch/uart.c.o -c -MMD -MP -march=rv32imc -mabi=ilp32  -flto -Wall -Wextra -static -mcmodel=medany -O3 -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce -Wno-sign-compare -Ilib/ibex -Ilib/misc -Ilib/arch -Ilib/libarch -Isrc
+riscv32-unknown-elf-gcc lib/libarch/timer.c -o build/lib/libarch/timer.c.o -c -MMD -MP -march=rv32imc -mabi=ilp32  -flto -Wall -Wextra -static -mcmodel=medany -O3 -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce -Wno-sign-compare -Ilib/ibex -Ilib/misc -Ilib/arch -Ilib/libarch -Isrc
+riscv32-unknown-elf-gcc src/main.c -o build/src/main.c.o -c -MMD -MP -march=rv32imc -mabi=ilp32  -flto -Wall -Wextra -static -mcmodel=medany -O3 -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fdce -Wno-sign-compare -Ilib/ibex -Ilib/misc -Ilib/arch -Ilib/libarch -Isrc
+riscv32-unknown-elf-g++ build/crt0.S.o build/lib/misc/print.c.o build/lib/libarch/uart.c.o build/lib/libarch/timer.c.o build/src/main.c.o -o output/demo-icobs-light.elf -march=rv32imc -mabi=ilp32 -Wl,--gc-sections -Wl,-Map=output/demo-icobs-light.map -nostdlib -nostartfiles  -T link.ld
+riscv32-unknown-elf-objcopy output/demo-icobs-light.elf -O binary output/demo-icobs-light.bin
+riscv32-unknown-elf-objcopy output/demo-icobs-light.elf -O ihex output/demo-icobs-light.hex
+rm build/lib/misc/. build/lib/libarch/. build/src/.
+Start loading code
+Timeout error, please reset the target

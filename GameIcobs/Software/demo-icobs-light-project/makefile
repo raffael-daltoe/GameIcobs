@@ -112,7 +112,7 @@ $(OUTDIR)/$(PROJECT).elf: $(OBJ) | $(OUTDIR)
 
 .PHONY: clean
 clean:
-	$(RRM) $(subst /,\\,$(OBJDIR))
+	$(RRM) $(subst /,\\,$(OBJDIR)) $(RRM) output/
 
 
 .PHONY: dump
