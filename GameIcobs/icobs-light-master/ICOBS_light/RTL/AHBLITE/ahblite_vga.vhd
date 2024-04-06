@@ -59,7 +59,7 @@ architecture arch of ahblite_vga is
 	signal RST 	   : std_logic;
 
     signal Background : std_logic_vector(31 downto 0);
-    signal Scoreboard : std_logic_vector(31 downto 0);
+    signal Score1,Score2,Score3,Score4 : std_logic_vector(31 downto 0);
 
 	signal Register_Foods : std_logic_vector(31 downto 0);
 	signal X0_Position, Y0_Position : std_logic_vector(31 downto 0);
@@ -103,10 +103,10 @@ begin
 	U_SEG_CTRL: entity work.seg_top port map(
 		mclk => HCLK,
 		rst  => RST,
-		E1   => Scoreboard(3 downto 0),
-		E2   => Scoreboard(7 downto 4),
-		E3   => Scoreboard(11 downto 8),
-		E4   => Scoreboard(15 downto 12),
+		E1   => Score1(3 downto 0),
+		E2   => Score2(3 downto 0),
+		E3   => Score3(3 downto 0),
+		E4   => Score4(3 downto 0),
 		seg  => seg,
 		an   => an,
 		dp   => dp
@@ -147,7 +147,10 @@ begin
 			Y4_Position    <= (others => '0');
 			X4_Position    <= (others => '0');
 			Register_Foods <= (others => '0');
-			Scoreboard <=  (others => '0');
+			Score1         <=  (others => '0');
+			Score2         <=  (others => '0');
+			Score3         <=  (others => '0');
+			Score4         <=  (others => '0');
 			
 		--------------------------------
 		elsif rising_edge(HCLK) then
@@ -176,8 +179,11 @@ begin
 					when x"0A" => Y4_Position <= SlaveIn.HWDATA;
 					
 					when x"0B" => Register_Foods  <= SlaveIn.HWDATA;
-					when x"0C" => Scoreboard <= SlaveIn.HWDATA;
-					
+					when x"0C" => Score1 		  <= SlaveIn.HWDATA;
+					when x"0D" => Score2 		  <= SlaveIn.HWDATA;
+					when x"0E" => Score3 		  <= SlaveIn.HWDATA;
+					when x"10" => Score4 		  <= SlaveIn.HWDATA;
+
 					when others =>
 				end case;
 			end if;
@@ -205,7 +211,12 @@ begin
 						when x"0A" => SlaveOut.HRDATA <= Y4_Position;
 						
 						when x"0B" => SlaveOut.HRDATA <= Register_Foods;
-						when x"0C" => SlaveOut.HRDATA <= Scoreboard;
+						
+						when x"0C" => SlaveOut.HRDATA <= Score1;
+						when x"0D" => SlaveOut.HRDATA <= Score2;
+						when x"0E" => SlaveOut.HRDATA <= Score3;
+						when x"10" => SlaveOut.HRDATA <= Score4;
+						
 						
 						when others =>
 					end case;

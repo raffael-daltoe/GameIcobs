@@ -74,6 +74,7 @@ static int check_collision(int x, int y);
 /*					GLOBAL VARIABLES					*/
 int TIMER_FLAG = 0;
 Position ghosts[] = {{0,0},{0,0},{0,0},{0,0}};
+int Scoreboard;
 
 static void timer_clock_cb(int code)
 {
@@ -262,7 +263,7 @@ static void init_Registers()
     MY_VGA.X4_Position = 153;    // some color
     MY_VGA.Background = 0;
     MY_VGA.Register_Foods = 0x0;
-    MY_VGA.Scoreboard = 0x0;
+    Scoreboard = 0x0;
 
     ghosts[0].x = MY_VGA.X1_Position;
     ghosts[0].y = MY_VGA.Y1_Position;
@@ -556,18 +557,45 @@ static void eaten(int i)
     if (!(MY_VGA.Register_Foods & (1 << i)))  // if the food isn't eaten yet
     {
         MY_VGA.Register_Foods |= (1 << i);  // Define the bit to mark the food
-        MY_VGA.Scoreboard++;             
+        Scoreboard++;             
     }   
 }
 
-// static void score(int Scoreboard)
-// {
-//     int unit = Scoreboard%10;
-//     int dizaine = Scoreboard/10 ;
-//     int hundreds= Scoreboard ;
+uint32_t digitTo7Segment(int digit) {
+    switch (digit) {
+        case 0: return 0;
+        case 1: return 1;
+        case 2: return 2;
+        case 3: return 3;
+        case 4: return 4;
+        case 5: return 5;
+        case 6: return 6;
+        case 7: return 7;
+        case 8: return 8;
+        case 9: return 9;
+        default: return 0; // For unexpected input
+    }
+}
 
-//     //MY_VGA.Sreg
-// }
+static void updateScoreboard(int score)
+{
+    // Assume each digit D3 D2 D1 D0 corresponds to MY_VGA.REG4, MY_VGA.REG3, MY_VGA.REG2, MY_VGA.REG1 respectively
+
+    int digits[4] = {0}; // To hold each digit of the score
+
+    // Extract each digit from the score
+    for (int i = 0; i < 4; i++) {
+        digits[i] = score % 10;
+        score /= 10;
+    }
+
+    // Convert each digit to its 7-segment display equivalent and store it in the corresponding register
+    // Assuming a function digitTo7Segment() converts a digit to its 7-segment representation
+    MY_VGA.Score1 = digitTo7Segment(digits[0]);
+    MY_VGA.Score2 = digitTo7Segment(digits[1]);
+    MY_VGA.Score3 = digitTo7Segment(digits[2]);
+    MY_VGA.Score4 = digitTo7Segment(digits[3]);
+}
 
 //          ________________________________________________________
 //        ._|                TABLE OF REGISTERS                    |_.
@@ -578,7 +606,10 @@ static void eaten(int i)
 //  |  X2,Y2        |       GHOST1                                            //
 //  |  X3,Y3        |       GHOST2                                            //
 //  |  X4,Y4        |       GHOST3                                            //
-//  |  Scoreboard   |       Score on 7SEG                                     //
+//  |  Score1       |       Score[0] on 7SEG                                  //
+//  |  Score2       |       Score[1] on 7SEG                                  //
+//  |  Score3       |       Score[2] on 7SEG                                  //
+//  |  Score4       |       Score[3] on 7SEG                                  //
 //  | Register_Foods|       Register of foods                                 //
 //  |  BACKGROUND   |       SW                                                //
 //  -----------------                                                         //
@@ -596,6 +627,7 @@ int main(void)
         moveGhostsAutomatically(rand);
         verifyButtons();
         verifyEats();
+        updateScoreboard(Scoreboard);
         verifySwitchBackground();
     }
 
