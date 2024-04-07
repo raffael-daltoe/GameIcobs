@@ -27,13 +27,18 @@ ENTITY VGA_Basic_ROM IS
         C_SW4                      : in unsigned(9 downto 0);  -- CONTROL OF GHOST4
         Register_Foods             : in STD_LOGIC_VECTOR(31 DOWNTO 0); 
 
+        win                        : IN STD_LOGIC;
+        lose                       : IN STD_LOGIC;
+
         -- ROM ADDRESSES
         romAddressMap               : OUT vector16;       -- MAP ADDRESS
         romAddressPacmanClosed      : OUT vector10;
         romAddressPacmanOpened      : OUT vector10;
         romAddressGhost             : OUT vector10;
         romAddressFood              : OUT vector7;
-
+        romAddressLoser             : OUT vector12; 
+        romAddressWinner            : OUT vector11;
+  
 
         -- ROM DATA INPUT
         romMap                  : IN vector12;       -- MAP    
@@ -41,7 +46,8 @@ ENTITY VGA_Basic_ROM IS
         romPacmanOpened         : IN vector12;
         romGhost                : IN vector12;
         romFood                 : IN vector12;
-
+        romLoser                : IN vector12;
+        romWinner               : IN vector12;
         --OUTPUT VGA
         red                     : OUT vector4;
         green                   : OUT vector4;
@@ -87,6 +93,9 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     SIGNAL spriteGhost3             : STD_LOGIC := '0';
     SIGNAL spriteGhost4             : STD_LOGIC := '0';
 
+    SIGNAL spriteLoser              : STD_LOGIC := '0';
+    SIGNAL spriteWinner             : STD_LOGIC := '0';
+
     -- DECLARATION OF SIGNALS COORDINATES AND ADDRESS OF ROM
     SIGNAL xpix, ypix               : UNSIGNED(9 DOWNTO 0);
     SIGNAL xpix_Pac, ypix_Pac       : UNSIGNED(9 DOWNTO 0);
@@ -95,17 +104,24 @@ ARCHITECTURE Behavioral OF VGA_Basic_ROM IS
     SIGNAL xpix_Ghost2,ypix_Ghost2  : UNSIGNED(9 DOWNTO 0);
     SIGNAL xpix_Ghost3,ypix_Ghost3  : UNSIGNED(9 DOWNTO 0);
     SIGNAL xpix_Ghost4,ypix_Ghost4  : UNSIGNED(9 DOWNTO 0);
+    SIGNAL xpix_Winner, ypix_Winner : UNSIGNED(9 DOWNTO 0);
+    SIGNAL xpix_Loser, ypix_Loser   : UNSIGNED(9 DOWNTO 0);
+
     SIGNAL romAddressMap_s          : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressPacmanClosed_s : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressPacmanOpened_s : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressFood_s         : STD_LOGIC_VECTOR(19 DOWNTO 0);
     SIGNAL romAddressGhost_s        : STD_LOGIC_VECTOR(19 DOWNTO 0);
+    SIGNAL romAddressLoser_s        : STD_LOGIC_VECTOR(19 DOWNTO 0);
+    SIGNAL romAddressWinner_s        : STD_LOGIC_VECTOR(19 DOWNTO 0);
+    
 BEGIN
 
 
     PROCESS (vc,hc,R_SW0,C_SW0,xpix,ypix,romAddressMap_s,romAddressPacmanOpened_s,
     ypix_Pac,xpix_Pac, romAddressFood_s, ypix_Food, xpix_Food,xpix_Ghost1,ypix_Ghost1,
-    xpix_Ghost2,ypix_Ghost2, xpix_Ghost3,ypix_Ghost3,xpix_Ghost4,ypix_Ghost4,romAddressGhost_s)
+    xpix_Ghost2,ypix_Ghost2, xpix_Ghost3,ypix_Ghost3,xpix_Ghost4,ypix_Ghost4,romAddressGhost_s,
+    xpix_Loser, ypix_Loser, romAddressLoser_s)
     BEGIN
     --                                      PACMANS
     --  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -456,6 +472,31 @@ BEGIN
         ELSE
             spriteOnRightDown <= '0';
         END IF;
+
+    --                                      LOSER && WINNER
+    --  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        IF (unsigned(hc) >= X_INIT_WINNER + hbp AND unsigned(hc) < X_INIT_WINNER + hbp + WWINNER AND
+            unsigned(vc) >= Y_INIT_WINNER + vbp AND unsigned(vc) < Y_INIT_WINNER + vbp + HWINNER) THEN
+            xpix_Winner <= unsigned(hc) - (hbp + X_INIT_WINNER);      
+            ypix_Winner <= unsigned(vc) - (vbp + Y_INIT_WINNER);    
+            romAddressWinner_s <= STD_LOGIC_VECTOR(TotalPixels(ypix_Winner, WWINNER) + xpix_Winner);
+            romAddressWinner <= romAddressWinner_s(10 downto 0);
+            spriteWinner <= '1';
+        ELSE
+            spriteWinner <= '0';
+        END IF;
+
+        IF (unsigned(hc) >= X_INIT_LOSER + hbp AND unsigned(hc) < X_INIT_LOSER + hbp + WLOSER AND
+            unsigned(vc) >= Y_INIT_LOSER + vbp AND unsigned(vc) < Y_INIT_LOSER + vbp + HLOSER) THEN
+            xpix_Loser <= unsigned(hc) - (hbp + X_INIT_LOSER);      
+            ypix_Loser <= unsigned(vc) - (vbp + Y_INIT_LOSER);    
+            romAddressLoser_s <= STD_LOGIC_VECTOR(TotalPixels(ypix_Loser, WLOSER) + xpix_Loser);
+            romAddressLoser <= romAddressLoser_s(11 downto 0);
+            spriteLoser <= '1';
+        ELSE
+            spriteLoser <= '0';
+        END IF;
+
     END PROCESS;
 
     PROCESS (spriteOnLeftTop, spriteOnRightTop, spriteOnLeftDown, spriteOnRightDown, 
@@ -464,308 +505,318 @@ BEGIN
             spriteFood5, spriteFood6, spriteFood7, spriteFood8, spriteFood9, spriteFood10,
             spriteFood11, spriteFood12, spriteFood13, spriteFood14, spriteFood15, spriteFood16,
             spriteFood17, spriteFood18, spriteFood19, spriteFood20, spriteGhost1,
-            spriteGhost2, spriteGhost3, spriteGhost4, romGhost, Register_Foods)
+            spriteGhost2, spriteGhost3, spriteGhost4, romGhost, Register_Foods,win,spriteWinner,
+            lose,spriteLoser)
     BEGIN
          red <= (OTHERS => '0');
          green <= (OTHERS => '0');
          blue <= (OTHERS => '0');
 
-        IF vidon = '1' AND spritePacmanOpen = '1' AND changePacman = '1' THEN
-            IF romPacmanOpened = x"FFF" THEN
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= romPacmanOpened(11 DOWNTO 8);
-                green <= romPacmanOpened(7 DOWNTO 4);
-                blue  <= romPacmanOpened(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon='1' AND spritePacmanClose = '1' AND changePacman = '0' THEN
-            IF romPacmanClosed = x"FFF" THEN                    
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= romPacmanClosed(11 DOWNTO 8);
-                green <= romPacmanClosed(7 DOWNTO 4);
-                blue  <= romPacmanClosed(3 DOWNTO 0);
-            END IF;
+        IF win = '1' AND spriteWinner = '1' AND vidon = '1' THEN
+            red   <= romWinner(11 DOWNTO 8);
+            green <= romWinner(7 DOWNTO 4);
+            blue  <= romWinner(3 DOWNTO 0);
+        ELSIF lose = '1' AND spriteLoser = '1' AND vidon = '1'  THEN
+            red   <= romLoser(11 DOWNTO 8);
+            green <= romLoser(7 DOWNTO 4);
+            blue  <= romLoser(3 DOWNTO 0);
+        ELSIF lose = '0' AND win = '0' THEN
+            IF vidon = '1' AND spritePacmanOpen = '1' AND changePacman = '1' THEN
+                IF romPacmanOpened = x"FFF" THEN
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= romPacmanOpened(11 DOWNTO 8);
+                    green <= romPacmanOpened(7 DOWNTO 4);
+                    blue  <= romPacmanOpened(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon='1' AND spritePacmanClose = '1' AND changePacman = '0' THEN
+                IF romPacmanClosed = x"FFF" THEN                    
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= romPacmanClosed(11 DOWNTO 8);
+                    green <= romPacmanClosed(7 DOWNTO 4);
+                    blue  <= romPacmanClosed(3 DOWNTO 0);
+                END IF;
 
-        ELSIF vidon = '1' AND spriteFood0 = '1' THEN
-            IF Register_Foods(0) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood1 = '1' THEN
-            IF Register_Foods(1) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood2 = '1' THEN
-            IF Register_Foods(2) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood3 = '1' THEN
-            IF Register_Foods(3) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood4 = '1' THEN
-            IF Register_Foods(4) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood5 = '1' THEN
-            IF Register_Foods(5) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood6 = '1' THEN
-            IF Register_Foods(6) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood7 = '1' THEN
-            IF Register_Foods(7) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood8 = '1' THEN
-            IF Register_Foods(8) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood9 = '1' THEN
-            IF Register_Foods(9) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood10 = '1' THEN
-            IF Register_Foods(10) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood11 = '1' THEN
-            IF Register_Foods(11) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood12 = '1' THEN
-            IF Register_Foods(12) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood13 = '1' THEN
-            IF Register_Foods(13) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood14 = '1' THEN
-            IF Register_Foods(14) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood15 = '1' THEN
-            IF Register_Foods(15) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood16 = '1'  THEN
-            IF Register_Foods(16) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood17 = '1' THEN
-            IF Register_Foods(17) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood18 = '1' THEN
-            IF Register_Foods(18) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood19 = '1' THEN
-            IF Register_Foods(19) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteFood20 = '1'  THEN
-            IF Register_Foods(20) = '0' THEN 
-                red   <= romFood(11 DOWNTO 8);
-                green <= romFood(7 DOWNTO 4);
-                blue  <= romFood(3 DOWNTO 0);
-            ELSE
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            END IF;
+            ELSIF vidon = '1' AND spriteFood0 = '1' THEN
+                IF Register_Foods(0) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood1 = '1' THEN
+                IF Register_Foods(1) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood2 = '1' THEN
+                IF Register_Foods(2) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood3 = '1' THEN
+                IF Register_Foods(3) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood4 = '1' THEN
+                IF Register_Foods(4) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood5 = '1' THEN
+                IF Register_Foods(5) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood6 = '1' THEN
+                IF Register_Foods(6) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood7 = '1' THEN
+                IF Register_Foods(7) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood8 = '1' THEN
+                IF Register_Foods(8) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood9 = '1' THEN
+                IF Register_Foods(9) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood10 = '1' THEN
+                IF Register_Foods(10) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood11 = '1' THEN
+                IF Register_Foods(11) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood12 = '1' THEN
+                IF Register_Foods(12) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood13 = '1' THEN
+                IF Register_Foods(13) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood14 = '1' THEN
+                IF Register_Foods(14) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood15 = '1' THEN
+                IF Register_Foods(15) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood16 = '1'  THEN
+                IF Register_Foods(16) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood17 = '1' THEN
+                IF Register_Foods(17) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood18 = '1' THEN
+                IF Register_Foods(18) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood19 = '1' THEN
+                IF Register_Foods(19) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteFood20 = '1'  THEN
+                IF Register_Foods(20) = '0' THEN 
+                    red   <= romFood(11 DOWNTO 8);
+                    green <= romFood(7 DOWNTO 4);
+                    blue  <= romFood(3 DOWNTO 0);
+                ELSE
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                END IF;
 
 
-        ELSIF vidon = '1' AND spriteGhost1 = '1' THEN       -- BLUE
-            IF romGhost = x"FFF" THEN       
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= romGhost(11 DOWNTO 8) ;
-                green <= romGhost(7 DOWNTO 4);
-                blue  <= romGhost(3 DOWNTO 0);
-            END IF;
-        ELSIF vidon = '1' AND spriteGhost2 = '1' THEN       -- RED
-            IF romGhost = x"FFF" THEN
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= romGhost(11 DOWNTO 8) OR "0100"; -- Aumenta o vermelho adicionando um valor
-                green <= romGhost(7 DOWNTO 4);
-                blue  <= romGhost(3 DOWNTO 0) AND "0111"; -- Diminui o azul removendo um valor
-            END IF;
-        ELSIF vidon = '1' AND spriteGhost3 = '1' THEN       -- PINK
-            IF romGhost = x"FFF" THEN
-                red   <= romMap(11 DOWNTO 8);
-                green <= romMap(7 DOWNTO 4);
-                blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= "1111"; -- Máximo de vermelho
-                green <= romGhost(7 DOWNTO 4); -- Mantém o valor original de verde, ajuste conforme necessário
-                blue  <= "1011"; -- Alto valor de azul, mas não o máximo, para dar uma tonalidade rosa
+            ELSIF vidon = '1' AND spriteGhost1 = '1' THEN       -- BLUE
+                IF romGhost = x"FFF" THEN       
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= romGhost(11 DOWNTO 8) ;
+                    green <= romGhost(7 DOWNTO 4);
+                    blue  <= romGhost(3 DOWNTO 0);
+                END IF;
+            ELSIF vidon = '1' AND spriteGhost2 = '1' THEN       -- RED
+                IF romGhost = x"FFF" THEN
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= romGhost(11 DOWNTO 8) OR "0100"; -- Aumenta o vermelho adicionando um valor
+                    green <= romGhost(7 DOWNTO 4);
+                    blue  <= romGhost(3 DOWNTO 0) AND "0111"; -- Diminui o azul removendo um valor
+                END IF;
+            ELSIF vidon = '1' AND spriteGhost3 = '1' THEN       -- PINK
+                IF romGhost = x"FFF" THEN
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= "1111"; -- Máximo de vermelho
+                    green <= romGhost(7 DOWNTO 4); -- Mantém o valor original de verde, ajuste conforme necessário
+                    blue  <= "1011"; -- Alto valor de azul, mas não o máximo, para dar uma tonalidade rosa
 
-            END IF;
-        ELSIF vidon = '1' AND spriteGhost4 = '1' THEN           -- GREEN
-            IF romGhost = x"FFF" THEN
+                END IF;
+            ELSIF vidon = '1' AND spriteGhost4 = '1' THEN           -- GREEN
+                IF romGhost = x"FFF" THEN
+                    red   <= romMap(11 DOWNTO 8);
+                    green <= romMap(7 DOWNTO 4);
+                    blue  <= romMap(3 DOWNTO 0);
+                ELSE
+                    red   <= romGhost(11 DOWNTO 8);
+                    green <= "0111"; -- Aumenta o verde
+                    blue  <= romGhost(3 DOWNTO 0);
+                END IF;
+                
+            ELSIF vidon = '1' AND spriteOnLeftTop = '1' THEN
                 red   <= romMap(11 DOWNTO 8);
                 green <= romMap(7 DOWNTO 4);
                 blue  <= romMap(3 DOWNTO 0);
-            ELSE
-                red   <= romGhost(11 DOWNTO 8);
-                green <= "0111"; -- Aumenta o verde
-                blue  <= romGhost(3 DOWNTO 0);
+            ELSIF vidon = '1' AND spriteOnRightTop = '1' THEN
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            ELSIF vidon = '1' AND spriteOnLeftDown = '1' THEN
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            ELSIF vidon = '1' AND spriteOnRightDown = '1' THEN
+                red   <= romMap(11 DOWNTO 8);
+                green <= romMap(7 DOWNTO 4);
+                blue  <= romMap(3 DOWNTO 0);
+            ELSIF vidon = '1' THEN
+                red   <= sw(11 downto 8) ;
+                green <= sw(7 downto 4);
+                blue  <= sw(3 downto 0); 
             END IF;
-            
-        ELSIF vidon = '1' AND spriteOnLeftTop = '1' THEN
-            red   <= romMap(11 DOWNTO 8);
-            green <= romMap(7 DOWNTO 4);
-            blue  <= romMap(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteOnRightTop = '1' THEN
-            red   <= romMap(11 DOWNTO 8);
-            green <= romMap(7 DOWNTO 4);
-            blue  <= romMap(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteOnLeftDown = '1' THEN
-            red   <= romMap(11 DOWNTO 8);
-            green <= romMap(7 DOWNTO 4);
-            blue  <= romMap(3 DOWNTO 0);
-        ELSIF vidon = '1' AND spriteOnRightDown = '1' THEN
-            red   <= romMap(11 DOWNTO 8);
-            green <= romMap(7 DOWNTO 4);
-            blue  <= romMap(3 DOWNTO 0);
-        ELSIF vidon = '1' THEN
-            red   <= sw(11 downto 8) ;
-		    green <= sw(7 downto 4);
-		    blue  <= sw(3 downto 0); 
-
         END IF;
     END PROCESS;
 

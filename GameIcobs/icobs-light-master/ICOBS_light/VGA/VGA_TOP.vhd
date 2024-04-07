@@ -22,6 +22,9 @@ ENTITY VGA_TOP IS
               R4          : IN STD_LOGIC_VECTOR(9 downto 0);
               C4          : IN STD_LOGIC_VECTOR(9 downto 0);
               
+              Winner      : IN STD_LOGIC;
+              Loser       : IN STD_LOGIC;
+
               Register_Foods_S : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
               
               sw          : IN STD_LOGIC_VECTOR (11 DOWNTO 0);
@@ -50,6 +53,8 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        SIGNAL C4_s                   : unsigned(9 downto 0);
       -- SIGNAL R5_s                   : unsigned(9 downto 0);
       -- SIGNAL C5_s                   : unsigned(9 downto 0);     
+      SIGNAL winner_s                : STD_LOGIC;
+      SIGNAL loser_s                 : STD_LOGIC;
        
        -- SIGNALS OF Memory OUTPUT PROM
        SIGNAL M_map_s                      : vector12;   -- 12 bits
@@ -57,6 +62,9 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        SIGNAL M_pacmanClosed_s             : vector12;   -- 12 bits
        SIGNAL M_Ghost_s                    : vector12;   -- 12 bits
        SIGNAL M_food_s                     : vector12;   -- 12 bits
+       SIGNAL M_loser_s                    : vector12;   -- 12 bits
+       SIGNAL M_winner_s                   : vector12;   -- 12 bits
+       
        
        -- SIGNALS OF Memory INPUT PROM             
        SIGNAL addr_pacmanOpened_s          : vector10;  -- 11 bits
@@ -64,6 +72,8 @@ ARCHITECTURE Behavioral OF VGA_TOP IS
        SIGNAL addr_Ghost                   : vector10;  -- 10 bits     
        SIGNAL addr_map_s                   : vector16;  -- 16 bits           
        SIGNAL addr_food_s                  : vector7;   -- 7 bits
+       SIGNAL addr_loser_s                 : vector12;
+       SIGNAL addr_winner_s                : vector11;
 
 BEGIN
     
@@ -93,6 +103,16 @@ BEGIN
     port map (clka          =>     clk25, 
               addra         =>     addr_food_s, 
               douta         =>     M_food_s);
+    
+    U_Winner: ENTITY work.prom_winner
+    port map (clka          =>     clk25, 
+              addra         =>     addr_winner_s, 
+              douta         =>     M_winner_s);
+
+    U_Loser: ENTITY work.prom_loser
+    port map (clka          =>     clk25, 
+              addra         =>     addr_loser_s, 
+              douta         =>     M_loser_s);
 
 
     -- PORT MAPS OF CLOCK, AND VSYNC/HSYNC
@@ -159,7 +179,8 @@ BEGIN
               romPacmanOpened      =>      M_pacmanOpened_s,
               romGhost             =>      M_Ghost_s,
               romFood              =>      M_food_s,
-              
+              romLoser             =>      M_loser_s,
+              romWinner            =>      M_winner_s,
               
               -- CONNECTION WITH Memory INPUT PROM
               romAddressMap            =>  addr_map_s,
@@ -167,8 +188,11 @@ BEGIN
               romAddressPacmanOpened   =>  addr_pacmanOpened_s,
               romAddressGhost          =>  addr_Ghost,
               romAddressFood           =>  addr_food_s,            
-       
+              romAddressLoser          =>  addr_loser_s, 
+              romAddressWinner         =>  addr_winner_s,
 
+              win               => winner_s,        
+              lose              => loser_s,
 
               red               =>      vgaRed, 
               green             =>      vgaGreen, 
@@ -182,17 +206,18 @@ BEGIN
     rst <= btnC;
 
 
-    R0_s <= to_unsigned(to_integer(unsigned(R0)), R0'length); 
-    C0_s <= to_unsigned(to_integer(unsigned(C0)), C0'length); 
-    R1_s <= to_unsigned(to_integer(unsigned(R1)), R1'length); 
-    C1_s <= to_unsigned(to_integer(unsigned(C1)), C1'length); 
-    R2_s <= to_unsigned(to_integer(unsigned(R2)), R2'length); 
-    C2_s <= to_unsigned(to_integer(unsigned(C2)), C2'length); 
-    R3_s <= to_unsigned(to_integer(unsigned(R3)), R3'length); 
-    C3_s <= to_unsigned(to_integer(unsigned(C3)), C3'length); 
-    R4_s <= to_unsigned(to_integer(unsigned(R4)), R4'length); 
-    C4_s <= to_unsigned(to_integer(unsigned(C4)), C4'length); 
-    --R5_s <= to_unsigned(to_integer(unsigned(R5)), R5'length); 
-    --C5_s <= to_unsigned(to_integer(unsigned(C5)), C5'length); 
+    R0_s      <= to_unsigned(to_integer(unsigned(R0)), R0'length); 
+    C0_s      <= to_unsigned(to_integer(unsigned(C0)), C0'length); 
+    R1_s      <= to_unsigned(to_integer(unsigned(R1)), R1'length); 
+    C1_s      <= to_unsigned(to_integer(unsigned(C1)), C1'length); 
+    R2_s      <= to_unsigned(to_integer(unsigned(R2)), R2'length); 
+    C2_s      <= to_unsigned(to_integer(unsigned(C2)), C2'length); 
+    R3_s      <= to_unsigned(to_integer(unsigned(R3)), R3'length); 
+    C3_s      <= to_unsigned(to_integer(unsigned(C3)), C3'length); 
+    R4_s      <= to_unsigned(to_integer(unsigned(R4)), R4'length); 
+    C4_s      <= to_unsigned(to_integer(unsigned(C4)), C4'length);  
+    loser_s   <= Loser; 
+    winner_s  <= Winner;
+    
     
 END Behavioral;

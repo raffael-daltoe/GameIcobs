@@ -61,9 +61,9 @@ architecture arch of ahblite_vga is
     signal Background : std_logic_vector(31 downto 0);
     signal Score1,Score2,Score3,Score4 : std_logic_vector(31 downto 0);
 
-	signal Register_Foods : std_logic_vector(31 downto 0);
+	signal Register_Foods 			: std_logic_vector(31 downto 0);
 	signal X0_Position, Y0_Position : std_logic_vector(31 downto 0);
-	signal x : std_logic;
+	signal Status 					: std_logic_vector(31 downto 0);
 	signal X1_Position, Y1_Position : std_logic_vector(31 downto 0);
 	signal X2_Position, Y2_Position : std_logic_vector(31 downto 0);
 
@@ -94,6 +94,8 @@ begin
 			C4				   => X4_Position(9 downto 0),
             Register_Foods_S   => Register_Foods,
             
+			Winner			   => Status(1),
+			Loser 			   => Status(0),
             vgaRed		   	   => vgaRed_ahblite,
             vgaGreen   		   => vgaGreen_ahblite,
             vgaBlue   		   => vgaBLue_ahblite
@@ -147,11 +149,12 @@ begin
 			Y4_Position    <= (others => '0');
 			X4_Position    <= (others => '0');
 			Register_Foods <= (others => '0');
-			Score1         <=  (others => '0');
-			Score2         <=  (others => '0');
-			Score3         <=  (others => '0');
-			Score4         <=  (others => '0');
-			
+			Score1         <= (others => '0');
+			Score2         <= (others => '0');
+			Score3         <= (others => '0');
+			Score4         <= (others => '0');
+			Status 		   <= (others => '0');
+
 		--------------------------------
 		elsif rising_edge(HCLK) then
 			-- Error management
@@ -182,8 +185,8 @@ begin
 					when x"0C" => Score1 		  <= SlaveIn.HWDATA;
 					when x"0D" => Score2 		  <= SlaveIn.HWDATA;
 					when x"0E" => Score3 		  <= SlaveIn.HWDATA;
-					when x"10" => Score4 		  <= SlaveIn.HWDATA;
-
+					when x"0F" => Score4 		  <= SlaveIn.HWDATA;
+					when x"10" => Status		  <= SlaveIn.HWDATA;
 					when others =>
 				end case;
 			end if;
@@ -215,8 +218,8 @@ begin
 						when x"0C" => SlaveOut.HRDATA <= Score1;
 						when x"0D" => SlaveOut.HRDATA <= Score2;
 						when x"0E" => SlaveOut.HRDATA <= Score3;
-						when x"10" => SlaveOut.HRDATA <= Score4;
-						
+						when x"0F" => SlaveOut.HRDATA <= Score4;
+						when x"10" => SlaveOut.HRDATA <= Status;
 						
 						when others =>
 					end case;

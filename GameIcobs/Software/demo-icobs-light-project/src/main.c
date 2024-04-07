@@ -66,16 +66,28 @@
 
 #define TRIES 50
 /*				PROTOTYPES OF FUNCTIONS					*/
-
-//static void moveGhosts(int numGhosts, int posX, int posY, int difficulty);
-static void eaten(int i);
+static void timer_clock_cb(int code);
+uint8_t simple_rand(uint8_t seed);
+static bool isPositionOccupiedByGhost(volatile unsigned int x, volatile unsigned int y);
+static bool isAreaFree(int newX, int newY, uint8_t currentGhostIndex);
+void moveGhostsAutomatically(uint8_t seed);
+static void init_GPIO_and_UART();
+static void init_Registers();
 static int check_collision(int x, int y);
+static void verifyEats();
+static void verifySwitchBackground();
+static void verifyButtons();
+static void eaten(int i);
+uint32_t digitTo7Segment(int digit);
+static void updateScoreboard(int score);
+static void Winner();
+static void Loser();
 
 /*					GLOBAL VARIABLES					*/
 int TIMER_FLAG = 0;
 Position ghosts[] = {{0,0},{0,0},{0,0},{0,0}};
 int Scoreboard;
-
+bool difficulty;
 static void timer_clock_cb(int code)
 {
     TIMER_FLAG = 1;
@@ -124,14 +136,15 @@ static bool isAreaFree(int newX, int newY, uint8_t currentGhostIndex) {
 }
 
 void moveGhostsAutomatically(uint8_t seed) {
-    uint8_t difficulty = 3; 
+    //uint8_t difficulty = 2; 
+    difficulty = ((MY_VGA.Background >> 12) & 1);
     for (uint8_t i = 0; i < GHOSTS; i++)
     {
         uint8_t movement = simple_rand(seed) % 4;
         volatile unsigned int newPosX = ghosts[i].x;
         volatile unsigned int newPosY = ghosts[i].y;
 
-        if (difficulty == 2)
+        if (difficulty == 0)
         { // Medium : occasionally movement in direction to PACMAN
             if (simple_rand(seed) % 4){ // 75% of chance of random movement, 25% of chance
                                                             // to follow PACMAN
@@ -202,9 +215,9 @@ void moveGhostsAutomatically(uint8_t seed) {
             }
         }
     }
+    if(isPositionOccupiedByGhost(MY_VGA.X0_Position,MY_VGA.Y0_Position) == true)
+        Loser();
 }
-
-
 
 static void init_GPIO_and_UART()
 {
@@ -263,8 +276,9 @@ static void init_Registers()
     MY_VGA.X4_Position = 153;    // some color
     MY_VGA.Background = 0;
     MY_VGA.Register_Foods = 0x0;
+    MY_VGA.Status = 0x0;
     Scoreboard = 0x0;
-
+    difficulty = 0;
     ghosts[0].x = MY_VGA.X1_Position;
     ghosts[0].y = MY_VGA.Y1_Position;
     ghosts[1].x = MY_VGA.X2_Position;
@@ -335,7 +349,6 @@ Food_Pos Food[] = {
     {211, 244},
     {151, 158},
     {266, 390}};
-
 
 int obstacle_count = sizeof(obstacles) / sizeof(obstacles[0]);
 int food_count = sizeof(Food) / sizeof(Food[0]);
@@ -508,6 +521,7 @@ static void verifySwitchBackground()
         MY_VGA.Background |= (1 << 15);
     else
         MY_VGA.Background &= ~(1 << 15);
+
 }
 
 static void verifyButtons()
@@ -597,6 +611,16 @@ static void updateScoreboard(int score)
     MY_VGA.Score4 = digitTo7Segment(digits[3]);
 }
 
+static void Loser(){
+    MY_VGA.Status |= (1 << 0);
+    exit(0);
+}
+
+static void Winner(){
+    MY_VGA.Status |= (1 << 1);
+    exit(0);
+}
+
 //          ________________________________________________________
 //        ._|                TABLE OF REGISTERS                    |_.
 ////////////////////////////////////////////////////////////////////////////////
@@ -610,6 +634,7 @@ static void updateScoreboard(int score)
 //  |  Score2       |       Score[1] on 7SEG                                  //
 //  |  Score3       |       Score[2] on 7SEG                                  //
 //  |  Score4       |       Score[3] on 7SEG                                  //
+//  |  Status       |       WIN OR LOSE                                       //
 //  | Register_Foods|       Register of foods                                 //
 //  |  BACKGROUND   |       SW                                                //
 //  -----------------                                                         //
@@ -619,9 +644,9 @@ int main(void)
     init_GPIO_and_UART();
     init_Registers();
     uint8_t rand = 95;
-
     while (true)
     {
+        if(Scoreboard == 21) Winner(); 
         rand++;
         delay_ms(1);
         moveGhostsAutomatically(rand);

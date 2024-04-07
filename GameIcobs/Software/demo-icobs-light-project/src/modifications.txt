@@ -7,7 +7,8 @@ Food        = 11x7 and size Port A = 77          -> compress 0.013 and 12
 PacmanOpen  = 29x29 and size Port A = 841       -> compress 0.09 and 12
 PacmanClose = 29x29 and size Port A = 841       -> compress 0.09 and 12
 Ghost       = 24x24 and size Port A = 576     -> compress 0.6 and 12
-
+Winner      = 48x35 and size Port A = 1680   -> compress 0.1 and 12
+Loser       = 49x49 and size Port A = 2401    -> compress 0.23 and 12
 
 Eu não estava conseguindo replicar a imagem no mesmo eixo X mas no eixo Y em baixo pois a ROM estava pegando um endereço que não valor correto. Então criei o process para poder coletar o endereço correto.
 

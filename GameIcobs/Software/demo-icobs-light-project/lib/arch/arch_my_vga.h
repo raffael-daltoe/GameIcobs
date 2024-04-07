@@ -18,6 +18,7 @@ typedef struct{
 	volatile unsigned int Score2;
 	volatile unsigned int Score3;
 	volatile unsigned int Score4;
+	volatile unsigned int Status;
 	
 } MY_VGA_t;
 

@@ -13,6 +13,7 @@ PACKAGE packages IS
     subtype vector9  is std_logic_vector(8 downto 0);
     subtype vector11 is std_logic_vector(10 downto 0);
     subtype vector12 is std_logic_vector(11 downto 0);
+    subtype vector13 is std_logic_vector(12 downto 0);
     subtype vector16 is std_logic_vector(15 downto 0);
     subtype vector17 is std_logic_vector(16 downto 0);
     subtype vector20 is std_logic_vector(19 downto 0);
@@ -83,6 +84,18 @@ PACKAGE packages IS
 
     CONSTANT WGhost  : unsigned(9 DOWNTO 0) := to_unsigned(24, 10); -- LARGURA
     CONSTANT HGhost  : unsigned(9 DOWNTO 0) := to_unsigned(24, 10); -- ALTURA
+
+    CONSTANT WWINNER : unsigned(9 DOWNTO 0) := to_unsigned(48,10);
+    CONSTANT HWINNER : unsigned(9 DOWNTO 0) := to_unsigned(35,10);
+
+    CONSTANT WLOSER  : unsigned(9 DOWNTO 0) := to_unsigned(49,10);
+    CONSTANT HLOSER  : unsigned(9 DOWNTO 0) := to_unsigned(49,10);
+
+    CONSTANT X_INIT_WINNER : unsigned(9 DOWNTO 0) := "0100100010";
+    CONSTANT Y_INIT_WINNER : unsigned(9 DOWNTO 0) := "0011100001";
+
+    CONSTANT X_INIT_LOSER  : unsigned(9 DOWNTO 0) := "0100100111";
+    CONSTANT Y_INIT_LOSER  : unsigned(9 DOWNTO 0) := "0011010111";
 
     CONSTANT X_INIT_MAP : unsigned(9 DOWNTO 0) := "0000101000";
     CONSTANT Y_INIT_MAP : unsigned(9 DOWNTO 0) := "0001010101";

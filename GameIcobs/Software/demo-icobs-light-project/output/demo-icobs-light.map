@@ -1,10 +1,28 @@
+Archive member included to satisfy reference by file (symbol)
+
+/home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+                              /tmp/ccPawbjF.ltrans0.ltrans.o (exit)
+/home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+                              /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o) (_global_impure_ptr)
+/home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
+                              /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o) (_exit)
 
 Discarded input sections
 
  .text          0x0000000000000000        0x8 build/crt0.S.o
  .data          0x0000000000000000        0x0 build/crt0.S.o
  .bss           0x0000000000000000        0x0 build/crt0.S.o
- .data          0x0000000000000000        0x0 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .data          0x0000000000000000        0x0 /tmp/ccPawbjF.ltrans0.ltrans.o
+ .text          0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+ .data          0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+ .bss           0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+ .text          0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .data          0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .bss           0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .sdata._impure_ptr
+                0x0000000000000000        0x4 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .data          0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
+ .bss           0x0000000000000000        0x0 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
 
 Memory Configuration
 
@@ -17,7 +35,7 @@ Linker script and memory map
 
 LOAD build/crt0.S.o
 LOAD build/lib/misc/print.c.o
-LOAD /tmp/ccySZzSP.ltrans0.ltrans.o
+LOAD /tmp/ccPawbjF.ltrans0.ltrans.o
 LOAD build/lib/libarch/uart.c.o
 LOAD build/lib/libarch/timer.c.o
 LOAD build/src/main.c.o
@@ -35,36 +53,40 @@ END GROUP
                 0x0000000000002000                __STACK_SIZE = 0x2000
                 0x0000000000002000                __HEAP_SIZE = 0x2000
 
-.text           0x0000000010000000     0x184f
+.text           0x0000000010000000     0x18ff
  *(.vectors)
  .vectors       0x0000000010000000       0x8c build/crt0.S.o
  *(.text)
- .text          0x000000001000008c      0x6a6 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .text          0x000000001000008c      0x6a6 /tmp/ccPawbjF.ltrans0.ltrans.o
                 0x00000000100005c0                IRQ_04_Handler
                 0x00000000100006b2                IRQ_00_Handler
                 0x0000000010000724                Default_Handler
+ .text          0x0000000010000732        0x2 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
+                0x0000000010000732                _exit
  *(.text.*)
  .text.Reset_Handler
-                0x0000000010000732       0x62 build/crt0.S.o
-                0x0000000010000732                Reset_Handler
+                0x0000000010000734       0x62 build/crt0.S.o
+                0x0000000010000734                Reset_Handler
  .text.Default_Handler
-                0x0000000010000794        0x2 build/crt0.S.o
-                0x0000000010000794                IRQ_08_Handler
-                0x0000000010000794                IRQ_06_Handler
-                0x0000000010000794                IRQ_11_Handler
-                0x0000000010000794                IRQ_10_Handler
-                0x0000000010000794                IRQ_07_Handler
-                0x0000000010000794                IRQ_01_Handler
-                0x0000000010000794                IRQ_13_Handler
-                0x0000000010000794                IRQ_14_Handler
-                0x0000000010000794                IRQ_02_Handler
-                0x0000000010000794                IRQ_05_Handler
-                0x0000000010000794                IRQ_NMI_Handler
-                0x0000000010000794                IRQ_09_Handler
-                0x0000000010000794                IRQ_03_Handler
-                0x0000000010000794                IRQ_12_Handler
- .text.startup  0x0000000010000796      0xe4e /tmp/ccySZzSP.ltrans0.ltrans.o
-                0x0000000010000796                main
+                0x0000000010000796        0x2 build/crt0.S.o
+                0x0000000010000796                IRQ_08_Handler
+                0x0000000010000796                IRQ_06_Handler
+                0x0000000010000796                IRQ_11_Handler
+                0x0000000010000796                IRQ_10_Handler
+                0x0000000010000796                IRQ_07_Handler
+                0x0000000010000796                IRQ_01_Handler
+                0x0000000010000796                IRQ_13_Handler
+                0x0000000010000796                IRQ_14_Handler
+                0x0000000010000796                IRQ_02_Handler
+                0x0000000010000796                IRQ_05_Handler
+                0x0000000010000796                IRQ_NMI_Handler
+                0x0000000010000796                IRQ_09_Handler
+                0x0000000010000796                IRQ_03_Handler
+                0x0000000010000796                IRQ_12_Handler
+ .text.startup  0x0000000010000798      0xed0 /tmp/ccPawbjF.ltrans0.ltrans.o
+                0x0000000010000798                main
+ .text.exit     0x0000000010001668       0x2c /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+                0x0000000010001668                exit
  *(.init)
  *(.fini)
  *crtbegin.o(.ctors)
@@ -80,68 +102,80 @@ END GROUP
  *(.lit)
  *(.shdata)
  *(.rodata)
- .rodata        0x00000000100015e4      0x254 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .rodata        0x0000000010001694      0x254 /tmp/ccPawbjF.ltrans0.ltrans.o
  *(.rodata.*)
  .rodata.str1.4
-                0x0000000010001838       0x17 /tmp/ccySZzSP.ltrans0.ltrans.o
+                0x00000000100018e8       0x17 /tmp/ccPawbjF.ltrans0.ltrans.o
  *(.eh_frame*)
  *(.shbss)
 
-.rela.dyn       0x0000000010001850        0x0
- .rela.text.Reset_Handler
-                0x0000000010001850        0x0 build/crt0.S.o
- .rela.vectors  0x0000000010001850        0x0 build/crt0.S.o
-                0x0000000010001850                . = ALIGN (0x4)
-                0x0000000010001850                _text_end = .
+.srodata._global_impure_ptr
+                0x0000000010001900        0x4
+ .srodata._global_impure_ptr
+                0x0000000010001900        0x4 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+                0x0000000010001900                _global_impure_ptr
 
-.data           0x0000000010010000        0x0 load address 0x0000000010001850
+.rela.dyn       0x0000000010001904        0x0
+ .rela.text.Reset_Handler
+                0x0000000010001904        0x0 build/crt0.S.o
+ .rela.vectors  0x0000000010001904        0x0 build/crt0.S.o
+ .rela.text.exit
+                0x0000000010001904        0x0 build/crt0.S.o
+ .rela.data.impure_data
+                0x0000000010001904        0x0 build/crt0.S.o
+                0x0000000010001904                . = ALIGN (0x4)
+                0x0000000010001904                _text_end = .
+
+.data           0x0000000010010000       0x60 load address 0x0000000010001904
                 0x0000000010010000                _data_start = .
  *(vtable)
  *(.data)
  *(.data.*)
+ .data.impure_data
+                0x0000000010010000       0x60 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
  *(.sdata)
  *(.sdata.*)
-                0x0000000010010000                . = ALIGN (0x4)
+                0x0000000010010060                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
-                0x0000000010010000                . = ALIGN (0x4)
+                0x0000000010010060                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array)
                 [!provide]                        PROVIDE (__init_array_end = .)
-                0x0000000010010000                . = ALIGN (0x4)
+                0x0000000010010060                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array)
                 [!provide]                        PROVIDE (__fini_array_end = .)
  *(.jcr*)
-                0x0000000010010000                . = ALIGN (0x4)
-                0x0000000010010000                _data_end = .
+                0x0000000010010060                . = ALIGN (0x4)
+                0x0000000010010060                _data_end = .
 
-.bss            0x0000000010010000       0xe4
-                0x0000000010010000                . = ALIGN (0x4)
-                0x0000000010010000                _bss_start = .
+.bss            0x0000000010010060       0xe4 load address 0x0000000010001964
+                0x0000000010010060                . = ALIGN (0x4)
+                0x0000000010010060                _bss_start = .
  *(.bss)
- .bss           0x0000000010010000       0xc0 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .bss           0x0000000010010060       0xc0 /tmp/ccPawbjF.ltrans0.ltrans.o
  *(.bss.*)
  *(.sbss)
- .sbss          0x00000000100100c0       0x24 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .sbss          0x0000000010010120       0x24 /tmp/ccPawbjF.ltrans0.ltrans.o
  *(.sbss.*)
  *(COMMON)
-                0x00000000100100e4                . = ALIGN (0x4)
-                0x00000000100100e4                _bss_end = .
+                0x0000000010010144                . = ALIGN (0x4)
+                0x0000000010010144                _bss_end = .
 
-.heap           0x00000000100100e4     0x2004
-                0x00000000100100e8                . = ALIGN (0x8)
- *fill*         0x00000000100100e4        0x4 
-                0x00000000100100e8                __end__ = .
-                0x00000000100100e8                _end = .
+.heap           0x0000000010010144     0x2004
+                0x0000000010010148                . = ALIGN (0x8)
+ *fill*         0x0000000010010144        0x4 
+                0x0000000010010148                __end__ = .
+                0x0000000010010148                _end = .
                 [!provide]                        PROVIDE (end = .)
-                0x00000000100120e8                . = (. + __HEAP_SIZE)
- *fill*         0x00000000100100e8     0x2000 
-                0x00000000100120e8                . = ALIGN (0x8)
-                0x00000000100120e8                __HeapLimit = .
+                0x0000000010012148                . = (. + __HEAP_SIZE)
+ *fill*         0x0000000010010148     0x2000 
+                0x0000000010012148                . = ALIGN (0x8)
+                0x0000000010012148                __HeapLimit = .
 
 .stack          0x000000001001e000     0x2000
                 0x000000001001e000                . = ALIGN (0x8)
@@ -158,8 +192,17 @@ OUTPUT(output/demo-icobs-light.elf elf32-littleriscv)
  .riscv.attributes
                 0x0000000000000000       0x24 build/crt0.S.o
  .riscv.attributes
-                0x0000000000000024       0x2a /tmp/ccySZzSP.ltrans0.ltrans.o
+                0x0000000000000024       0x2a /tmp/ccPawbjF.ltrans0.ltrans.o
+ .riscv.attributes
+                0x000000000000004e       0x26 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+ .riscv.attributes
+                0x0000000000000074       0x26 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .riscv.attributes
+                0x000000000000009a       0x26 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
 
 .comment        0x0000000000000000       0x12
- .comment       0x0000000000000000       0x12 /tmp/ccySZzSP.ltrans0.ltrans.o
+ .comment       0x0000000000000000       0x12 /tmp/ccPawbjF.ltrans0.ltrans.o
                                          0x13 (size before relaxing)
+ .comment       0x0000000000000012       0x13 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-exit.o)
+ .comment       0x0000000000000012       0x13 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libc_nano.a(lib_a-impure.o)
+ .comment       0x0000000000000012       0x13 /home/raffael/Desktop/Polytech/SEA8/archi2/riscv-compiler/bin/../lib/gcc/riscv32-unknown-elf/11.1.0/../../../../riscv32-unknown-elf/lib/libnosys.a(_exit.o)
