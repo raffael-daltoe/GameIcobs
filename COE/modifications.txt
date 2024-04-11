@@ -1,0 +1,27 @@
+28/03 -> Added the flags -flto and -O3 to the makefile.
+-flto: Enables Link-Time Optimization, allowing the compiler to perform optimizations across all compilation units during the link stage.
+-ffunction-sections and -fdata-sections: Place each function or data item into its own section in the output file, which enables the linker to remove unused sections and potentially reduce the size of the executable.
+
+Map = 249x138 and Port A size = 34362 -> compression 0.8 and 12
+Food = 11x7 and Port A size = 77 -> compression 0.013 and 12
+PacmanOpen = 29x29 and Port A size = 841 -> compression 0.09 and 12
+PacmanClose = 29x29 and Port A size = 841 -> compression 0.09 and 12
+Ghost = 24x24 and Port A size = 576 -> compression 0.6 and 12
+Winner = 48x35 and Port A size = 1680 -> compression 0.1 and 12
+Loser = 49x49 and Port A size = 2401 -> compression 0.23 and 12
+
+I couldn't replicate the image on the same X-axis but on the Y-axis below because the ROM was fetching an incorrect address. So, I created a process to collect the correct address.
+
+To mirror the positions horizontally and vertically depending on the location of the image, we need to change these lines:
+xpix <= unsigned(hc) - (hbp + X_INIT_MAP); -- X_INIT_MAP = HORIZONTAL
+ypix <= unsigned(vc) - (vbp + Y_INIT_MAP); -- Y_INIT_MAP = VERTICAL
+
+Only horizontal -> treat as if it were on the last pixel of the horizontal line, then:
+xpix <= (W1 - 1) - (unsigned(hc) - (hbp + X_INIT_MAP + W1));
+
+Only vertical -> treat as if it were on the last pixel of the vertical line, horizontal remains the same:
+ypix <= H1 - 1 - (unsigned(vc) - (vbp + Y_INIT_MAP) - H1);
+
+Horizontal and vertical together -> completely invert, imagine that we are on the last pixel of the horizontal and vertical lines at the same time:
+xpix <= (X_INIT_MAP + W1 + W1 - 1) - unsigned(hc);
+ypix <= (Y_INIT_MAP + H1 + H1 - 1) - unsigned(vc);
